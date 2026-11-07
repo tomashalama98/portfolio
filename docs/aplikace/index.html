@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%227%22 fill=%22%230d7b76%22/%3E%3Ctext x=%2216%22 y=%2222%22 font-family=%22Georgia,serif%22 font-size=%2217%22 font-weight=%22700%22 fill=%22white%22 text-anchor=%22middle%22%3ETH%3C/text%3E%3C/svg%3E">
 <meta name="description" content="Cvičná webová aplikace pro evidenci revizí, na které probíhalo testování.">
 <title>Evidence údržby jeřábů</title>
 <style>
-  /* ---------- Barvy a základ (světlý motiv, záměrně jednotný) ---------- */
+  /* ---------- Barvy a základ (světlý i tmavý motiv) ---------- */
   :root {
     --bg: #f4f6f8;
     --surface: #ffffff;
@@ -19,7 +20,26 @@
     --warn: #c6761a;
     --bad: #c23b3b;
     --warn-bg: #fdf1df;
+    --surface-2: #ffffff;
+    --over-bg: #f7dede;
+    --ok-bg: #e3f3e9;
+    --warn-tag-bg: #fbecd6;
+    --on-accent: #ffffff;
     color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #11161c; --surface: #1a2129; --surface-2: #1f2730; --fg: #e4eaf0; --muted: #98a6b4;
+      --border: #2c3641; --accent: #4a9fd6; --accent-dark: #7bbbe6;
+      --ok: #4cc07c; --warn: #e3a04f; --bad: #e57373; --warn-bg: #3a2c17; --over-bg: #3d2224; --ok-bg: #173325; --warn-tag-bg: #3a2c17; --on-accent: #0b1520;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #11161c; --surface: #1a2129; --surface-2: #1f2730; --fg: #e4eaf0; --muted: #98a6b4;
+    --border: #2c3641; --accent: #4a9fd6; --accent-dark: #7bbbe6;
+    --ok: #4cc07c; --warn: #e3a04f; --bad: #e57373; --warn-bg: #3a2c17; --over-bg: #3d2224; --ok-bg: #173325; --warn-tag-bg: #3a2c17; --on-accent: #0b1520;
+    color-scheme: dark;
   }
   * { box-sizing: border-box; }
   body {
@@ -64,7 +84,7 @@
     border: 1px solid var(--border);
     border-radius: 8px;
     font: inherit;
-    background: #fff;
+    background: var(--surface-2);
     color: var(--fg);
     min-width: 0;
   }
@@ -78,10 +98,10 @@
     border: 1px solid transparent;
     padding: 9px 16px;
   }
-  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary { background: var(--accent); color: var(--on-accent); }
   .btn-primary:hover { background: var(--accent-dark); }
   .btn-ghost { background: transparent; border-color: var(--border); color: var(--fg); }
-  .btn-danger { background: var(--bad); color: #fff; }
+  .btn-danger { background: var(--bad); color: var(--on-accent); }
   .msg { font-size: .88rem; }
   .msg.error { color: var(--bad); }
   .msg.okmsg { color: var(--ok); }
@@ -100,12 +120,12 @@
   th, td { text-align: left; padding: 10px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
   th { font-size: .76rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
   tr.due { background: var(--warn-bg); }
-  tr.due.over { background: #f7dede; }
+  tr.due.over { background: var(--over-bg); }
 
   .tag { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: .78rem; font-weight: 600; }
-  .tag.ok { background: #e3f3e9; color: var(--ok); }
-  .tag.warn { background: #fbecd6; color: var(--warn); }
-  .tag.bad { background: #f7dede; color: var(--bad); }
+  .tag.ok { background: var(--ok-bg); color: var(--ok); }
+  .tag.warn { background: var(--warn-tag-bg); color: var(--warn); }
+  .tag.bad { background: var(--over-bg); color: var(--bad); }
   .due-flag { color: var(--warn); font-weight: 600; font-size: .8rem; }
   .due-flag.over { color: var(--bad); }
 
@@ -168,7 +188,7 @@
       </div>
       <div class="actions">
         <button type="submit" class="btn-primary">Přidat záznam</button>
-        <span id="msg" class="msg"></span>
+        <span id="msg" class="msg" role="status" aria-live="polite"></span>
       </div>
     </form>
   </section>
@@ -209,8 +229,8 @@
 
 <!-- ====== Potvrzovací okno pro mazání ====== -->
 <div class="overlay" id="overlay">
-  <div class="modal">
-    <h3>Opravdu smazat?</h3>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h3 id="modalTitle">Opravdu smazat?</h3>
     <p id="modalText">Záznam bude odstraněn.</p>
     <div class="row">
       <button class="btn-ghost" id="cancelDel">Zrušit</button>
