@@ -1,0 +1,7 @@
+node_modules/
+test-results/
+playwright-report/
+stranky/
+jerab-udrzba/
+jerab-udrzba-web.html
+sql/vysledek.txt

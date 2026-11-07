@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evidence údržby jeřábů</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* ---------- Barvy a základ (světlý motiv, záměrně jednotný) ---------- */
+  :root {
+    --bg: #f4f6f8;
+    --surface: #ffffff;
+    --fg: #1b2430;
+    --muted: #5c6b7a;
+    --border: #dbe2ea;
+    --accent: #1d6fa5;
+    --accent-dark: #16567f;
+    --ok: #1f8a4c;
+    --warn: #c6761a;
+    --bad: #c23b3b;
+    --warn-bg: #fdf1df;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", system-ui, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.5;
+  }
+  .wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    padding-top: 24px;
+    padding-bottom: 60px;
+    padding-left: max(18px, env(safe-area-inset-left, 0px));
+    padding-right: max(18px, env(safe-area-inset-right, 0px));
+  }
+
+  header h1 { margin: 0 0 4px; font-size: 1.6rem; }
+  header p { margin: 0 0 22px; color: var(--muted); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 20px;
+  }
+  h2 { font-size: 1.05rem; margin: 0 0 14px; }
+
+  /* ---------- Formulář ---------- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+  }
+  label { display: block; font-size: .82rem; color: var(--muted); margin-bottom: 4px; }
+  label .req { color: var(--bad); }
+  input, select {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font: inherit;
+    background: #fff;
+    color: var(--fg);
+    min-width: 0;
+  }
+  input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .actions { margin-top: 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  button {
+    font: inherit;
+    cursor: pointer;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    padding: 9px 16px;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-dark); }
+  .btn-ghost { background: transparent; border-color: var(--border); color: var(--fg); }
+  .btn-danger { background: var(--bad); color: #fff; }
+  .msg { font-size: .88rem; }
+  .msg.error { color: var(--bad); }
+  .msg.okmsg { color: var(--ok); }
+
+  /* ---------- Ovládání seznamu ---------- */
+  .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .toolbar .count { font-size: .9rem; color: var(--muted); }
+  .toolbar .count b { color: var(--fg); }
+  .filter { display: flex; align-items: center; gap: 8px; }
+  .filter label { margin: 0; }
+  .filter select { width: auto; }
+
+  /* ---------- Tabulka ---------- */
+  .tablebox { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+  th, td { text-align: left; padding: 10px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th { font-size: .76rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  tr.due { background: var(--warn-bg); }
+  tr.due.over { background: #f7dede; }
+
+  .tag { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: .78rem; font-weight: 600; }
+  .tag.ok { background: #e3f3e9; color: var(--ok); }
+  .tag.warn { background: #fbecd6; color: var(--warn); }
+  .tag.bad { background: #f7dede; color: var(--bad); }
+  .due-flag { color: var(--warn); font-weight: 600; font-size: .8rem; }
+  .due-flag.over { color: var(--bad); }
+
+  .empty { text-align: center; color: var(--muted); padding: 26px 10px; }
+
+  /* ---------- Potvrzovací okno ---------- */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(15,25,35,.45);
+    display: none; align-items: center; justify-content: center; padding: 18px;
+  }
+  .overlay.show { display: flex; }
+  .modal {
+    background: var(--surface); border-radius: 12px; padding: 22px;
+    max-width: 380px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,.25);
+  }
+  .modal h3 { margin: 0 0 8px; }
+  .modal p { margin: 0 0 18px; color: var(--muted); }
+  .modal .row { display: flex; gap: 10px; justify-content: flex-end; }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Evidence údržby jeřábů</h1>
+    <p>Záznamy o revizích a kontrolách strojů. Blížící se nebo prošlé revize se zvýrazní.</p>
+  </header>
+
+  <!-- ====== FORMULÁŘ: nový záznam ====== -->
+  <section class="card">
+    <h2>Nový záznam o revizi</h2>
+    <form id="form" novalidate>
+      <div class="grid">
+        <div>
+          <label for="jerab">Jeřáb / stroj <span class="req">*</span></label>
+          <input id="jerab" name="jerab" type="text" placeholder="např. Liebherr LTM 1050">
+        </div>
+        <div>
+          <label for="datum">Datum revize <span class="req">*</span></label>
+          <input id="datum" name="datum" type="date">
+        </div>
+        <div>
+          <label for="technik">Technik <span class="req">*</span></label>
+          <input id="technik" name="technik" type="text" placeholder="Jméno technika">
+        </div>
+        <div>
+          <label for="vysledek">Výsledek</label>
+          <select id="vysledek" name="vysledek">
+            <option value="Vyhověl">Vyhověl</option>
+            <option value="S výhradami">S výhradami</option>
+            <option value="Nevyhověl">Nevyhověl</option>
+          </select>
+        </div>
+        <div>
+          <label for="dalsi">Příští revize</label>
+          <input id="dalsi" name="dalsi" type="date">
+        </div>
+      </div>
+      <div class="actions">
+        <button type="submit" class="btn-primary">Přidat záznam</button>
+        <span id="msg" class="msg"></span>
+      </div>
+    </form>
+  </section>
+
+  <!-- ====== SEZNAM záznamů ====== -->
+  <section class="card">
+    <div class="toolbar">
+      <div class="count">Počet záznamů: <b id="count">0</b></div>
+      <div class="filter">
+        <label for="filtr">Filtr výsledku:</label>
+        <select id="filtr">
+          <option value="vse">Vše</option>
+          <option value="Vyhověl">Vyhověl</option>
+          <option value="S výhradami">S výhradami</option>
+          <option value="Nevyhověl">Nevyhověl</option>
+        </select>
+      </div>
+    </div>
+    <div class="tablebox">
+      <table>
+        <thead>
+          <tr>
+            <th>Jeřáb / stroj</th>
+            <th>Datum revize</th>
+            <th>Technik</th>
+            <th>Výsledek</th>
+            <th>Příští revize</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div id="empty" class="empty" hidden>Zatím žádné záznamy. Přidej první výše. 👆</div>
+  </section>
+
+</div>
+
+<!-- ====== Potvrzovací okno pro mazání ====== -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3>Opravdu smazat?</h3>
+    <p id="modalText">Záznam bude odstraněn.</p>
+    <div class="row">
+      <button class="btn-ghost" id="cancelDel">Zrušit</button>
+      <button class="btn-danger" id="confirmDel">Smazat</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   Evidence údržby jeřábů — logika appky
+   Data se ukládají do prohlížeče (localStorage), takže
+   po zavření a otevření zůstanou zachována.
+   ========================================================= */
+
+const STORAGE_KEY = "jerab-udrzba-zaznamy";
+const DNY_UPOZORNENI = 30;     // za kolik dní dopředu hlásit blížící se revizi
+
+// Prvky stránky, se kterými pracujeme
+const form = document.getElementById("form");
+const msg = document.getElementById("msg");
+const tbody = document.getElementById("tbody");
+const countEl = document.getElementById("count");
+const emptyEl = document.getElementById("empty");
+const filtrEl = document.getElementById("filtr");
+
+// Pole se všemi záznamy (v paměti)
+let records = nactiData();
+
+// Pokud je appka úplně prázdná (první spuštění), nasypeme ukázková data
+if (records.length === 0) {
+  records = [
+    { id: 1, jerab: "Liebherr LTM 1050", datum: "2026-09-10", technik: "Novák", vysledek: "Vyhověl", dalsi: datumZaDni(200) },
+    { id: 2, jerab: "Tatra AD 28",        datum: "2026-10-02", technik: "Svoboda", vysledek: "S výhradami", dalsi: datumZaDni(20) },
+    { id: 3, jerab: "Demag AC 40",        datum: "2026-07-18", technik: "Dvořák", vysledek: "Nevyhověl", dalsi: datumZaDni(-10) },
+  ];
+  ulozData();
+}
+
+/* ---------- Načtení / uložení dat ---------- */
+function nactiData() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+function ulozData() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); } catch (e) {}
+}
+
+/* ---------- Pomocné funkce pro datum ---------- */
+function datumZaDni(pocet) {
+  const d = new Date();
+  d.setDate(d.getDate() + pocet);
+  return d.toISOString().slice(0, 10);
+}
+function formatDatum(iso) {
+  if (!iso) return "—";
+  const [r, m, d] = iso.split("-");
+  return `${d}. ${m}. ${r}`;
+}
+// Vrátí stav příští revize: "po" (prošlá), "blizi" (do 30 dní), nebo "" (v pořádku)
+function stavRevize(iso) {
+  if (!iso) return "";
+  const dnes = new Date();
+  dnes.setHours(0, 0, 0, 0);
+  const cil = new Date(iso);
+  const rozdilDni = Math.round((cil - dnes) / (1000 * 60 * 60 * 24));
+  if (rozdilDni < 0) return "po";                 // už je po termínu
+  if (rozdilDni <= DNY_UPOZORNENI) return "blizi"; // blíží se
+  return "";
+}
+
+/* ---------- Přidání záznamu ---------- */
+form.addEventListener("submit", function (e) {
+  e.preventDefault();
+  const jerab = document.getElementById("jerab").value.trim();
+  const datum = document.getElementById("datum").value;
+  const technik = document.getElementById("technik").value.trim();
+  const vysledek = document.getElementById("vysledek").value;
+  const dalsi = document.getElementById("dalsi").value;
+
+  // Kontrola povinných polí
+  if (!jerab || !datum || !technik) {
+    zobrazZpravu("Vyplňte prosím povinná pole označená *.", "error");
+    return;
+  }
+
+  const novy = {
+    id: Date.now(),
+    jerab: jerab,
+    datum: datum,
+    technik: technik,
+    vysledek: vysledek,
+    dalsi: dalsi,
+  };
+  records.push(novy);
+  ulozData();
+  vykresli();
+  countEl.textContent = records.length;     // aktualizace počtu
+
+  form.reset();
+  zobrazZpravu("Záznam byl přidán.", "okmsg");
+});
+
+function zobrazZpravu(text, trida) {
+  msg.textContent = text;
+  msg.className = "msg " + trida;
+  setTimeout(() => { msg.textContent = ""; msg.className = "msg"; }, 3500);
+}
+
+/* ---------- Filtr ---------- */
+filtrEl.addEventListener("change", vykresli);
+
+function projdeFiltrem(r) {
+  const f = filtrEl.value;
+  if (f === "vse") return true;
+  return r.vysledek === f;
+}
+
+/* ---------- Vykreslení tabulky ---------- */
+function vykresli() {
+  const viditelne = records.filter(projdeFiltrem);
+  tbody.innerHTML = "";
+
+  viditelne.forEach(function (r) {
+    const tr = document.createElement("tr");
+    const stav = stavRevize(r.dalsi);
+    if (stav) tr.className = stav === "po" ? "due over" : "due";
+
+    const tagTrida = r.vysledek === "Vyhověl" ? "ok"
+                   : r.vysledek === "S výhradami" ? "warn" : "bad";
+
+    const vlajka = stav === "po"
+      ? '<span class="due-flag over">⚠ po termínu</span>'
+      : stav === "blizi"
+      ? '<span class="due-flag">⚠ blíží se</span>'
+      : '';
+
+    tr.innerHTML = `
+      <td>${escapeHtml(r.jerab)}</td>
+      <td>${formatDatum(r.datum)}</td>
+      <td>${escapeHtml(r.technik) || "—"}</td>
+      <td><span class="tag ${tagTrida}">${escapeHtml(r.vysledek)}</span></td>
+      <td>${formatDatum(r.dalsi)} ${vlajka}</td>
+      <td><button class="btn-ghost" data-id="${r.id}" data-del>Smazat</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  emptyEl.hidden = viditelne.length !== 0;
+}
+
+// Ochrana proti rozbití HTML, když někdo napíše < > do pole
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text == null ? "" : text;
+  return div.innerHTML;
+}
+
+/* ---------- Mazání s potvrzením ---------- */
+const overlay = document.getElementById("overlay");
+const modalText = document.getElementById("modalText");
+let mazanyId = null;
+
+tbody.addEventListener("click", function (e) {
+  const btn = e.target.closest("[data-del]");
+  if (!btn) return;
+  mazanyId = Number(btn.getAttribute("data-id"));
+  const rec = records.find(r => r.id === mazanyId);
+  modalText.textContent = rec ? `Záznam „${rec.jerab}" bude odstraněn.` : "Záznam bude odstraněn.";
+  overlay.classList.add("show");
+});
+
+document.getElementById("cancelDel").addEventListener("click", function () {
+  overlay.classList.remove("show");
+  mazanyId = null;
+});
+
+document.getElementById("confirmDel").addEventListener("click", function () {
+  records = records.filter(r => r.id !== mazanyId);
+  ulozData();
+  vykresli();
+  countEl.textContent = records.length;     // aktualizace počtu i po smazání
+  overlay.classList.remove("show");
+  mazanyId = null;
+});
+
+/* ---------- Datumová pole: kalendář otevřít kliknutím kamkoliv ---------- */
+document.querySelectorAll('input[type="date"]').forEach(function (inp) {
+  inp.addEventListener("click", function () {
+    try { if (inp.showPicker) inp.showPicker(); } catch (e) {}
+  });
+});
+
+/* ---------- První vykreslení ---------- */
+vykresli();
+countEl.textContent = records.length;
+</script>
+
+</body>
+</html>

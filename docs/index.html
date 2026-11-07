@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Tomáš Halama – portfolio testera softwaru: ruční testování, bug reporty, testovací případy, SQL, API a Playwright.">
+<title>Tomáš Halama — tester</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+  /* Layout: sticky horní lišta s menu + jedna "stránka" na kapitolu (přepínání přes #hash). Identita: teal akcent, krémové neutrály, Fraunces/Hanken/JetBrains. */
+  :root {
+    --bg: #f3f1ec;
+    --surface: #ffffff;
+    --surface-2: #f7f5f0;
+    --fg: #20262b;
+    --muted: #5f6a72;
+    --faint: #8c959c;
+    --border: #e1ddd3;
+    --accent: #16796a;
+    --accent-ink: #0f5a4e;
+    --accent-bg: #dcefe9;
+    --gold: #a9741f;
+    --done: #1f8a4c;
+    --done-bg: #e4f4ea;
+    --warn: #b5701a;
+    --warn-bg: #fbeed6;
+    --bad: #c23b3b;
+    --bad-bg: #f7e3e3;
+    --mono-bg: #ece9e1;
+    --code-bg: #20262b0d;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #11161a;
+      --surface: #192025;
+      --surface-2: #1f272d;
+      --fg: #e8ecef;
+      --muted: #a2adb4;
+      --faint: #74808a;
+      --border: #2b343b;
+      --accent: #4bc0ad;
+      --accent-ink: #7dd6c6;
+      --accent-bg: #14302b;
+      --gold: #d6a24f;
+      --done: #4cc47e;
+      --done-bg: #16301f;
+      --warn: #e0a24a;
+      --warn-bg: #352713;
+      --bad: #e8736f;
+      --bad-bg: #351c1c;
+      --mono-bg: #222a30;
+      --code-bg: #0b0e11;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #11161a;
+    --surface: #192025;
+    --surface-2: #1f272d;
+    --fg: #e8ecef;
+    --muted: #a2adb4;
+    --faint: #74808a;
+    --border: #2b343b;
+    --accent: #4bc0ad;
+    --accent-ink: #7dd6c6;
+    --accent-bg: #14302b;
+    --gold: #d6a24f;
+    --done: #4cc47e;
+    --done-bg: #16301f;
+    --warn: #e0a24a;
+    --warn-bg: #352713;
+    --bad: #e8736f;
+    --bad-bg: #351c1c;
+    --mono-bg: #222a30;
+    --code-bg: #0b0e11;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font-family: "Hanken Grotesk", system-ui, Arial, sans-serif;
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0 0 auto;
+    height: env(safe-area-inset-top, 0px); background: var(--surface); z-index: 21;
+  }
+  a { color: var(--accent-ink); }
+
+  /* ---------- Horní lišta / menu ---------- */
+  .topbar {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+  }
+  .topbar-inner {
+    max-width: 900px; margin: 0 auto;
+    display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px;
+    padding-block: 10px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .brand {
+    font-family: "Fraunces", Georgia, serif; font-weight: 600; font-size: 1.02rem;
+    color: var(--fg); text-decoration: none; white-space: nowrap; margin-right: auto;
+  }
+  .brand .dot { color: var(--accent); }
+  .nav {
+    display: flex; gap: 2px; overflow-x: auto; min-width: 0;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav a {
+    font-family: "JetBrains Mono", monospace; font-size: .76rem; letter-spacing: .01em;
+    color: var(--muted); text-decoration: none; padding: 7px 11px; border-radius: 8px; white-space: nowrap;
+  }
+  .nav a:hover { color: var(--accent); }
+  .nav a.active { color: var(--accent-ink); background: var(--accent-bg); font-weight: 600; }
+  .nav a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .wrap {
+    max-width: 900px; margin: 0 auto;
+    padding-top: 28px; padding-bottom: 64px;
+    padding-left: max(18px, env(safe-area-inset-left, 0px));
+    padding-right: max(18px, env(safe-area-inset-right, 0px));
+  }
+
+  /* ---------- Typografie ---------- */
+  .eyebrow {
+    font-family: "JetBrains Mono", monospace; font-size: .74rem;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin: 0 0 10px;
+  }
+  h1 {
+    font-family: "Fraunces", Georgia, serif; font-weight: 600;
+    font-size: clamp(2rem, 5.5vw, 3rem); line-height: 1.05; margin: 0 0 10px; text-wrap: balance;
+  }
+  h2 { font-family: "Fraunces", Georgia, serif; font-weight: 600; font-size: 1.4rem; margin: 36px 0 12px; text-wrap: balance; }
+  h3 { text-wrap: balance; }
+  .lede { font-size: 1.05rem; color: var(--muted); margin: 0 0 22px; max-width: 62ch; }
+  .sub { color: var(--muted); margin: 0 0 18px; max-width: 62ch; }
+  .role { font-size: 1.15rem; color: var(--muted); margin: 0 0 18px; }
+  .role b { color: var(--fg); font-weight: 600; }
+  .pitch { font-size: 1.06rem; max-width: 60ch; margin: 0 0 8px; }
+  .pitch b { font-weight: 600; }
+
+  /* ---------- Meta mřížka ---------- */
+  .meta {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px; background: var(--border); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden; margin-bottom: 26px;
+  }
+  .meta div { background: var(--surface); padding: 12px 14px; }
+  .meta dt { font-family: "JetBrains Mono", monospace; font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); margin: 0 0 3px; }
+  .meta dd { margin: 0; font-weight: 600; font-size: .95rem; }
+
+  /* ---------- Statistiky ---------- */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 8px; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .stat .num { font-family: "Fraunces", Georgia, serif; font-weight: 700; font-size: 2rem; line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat .lab { font-size: .82rem; color: var(--muted); margin-top: 6px; }
+  .stat.ok .num { color: var(--done); }
+  .stat.warn .num { color: var(--warn); }
+
+  /* ---------- Rozcestník na úvodu ---------- */
+  .chapters { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+  a.chcard {
+    display: block; text-decoration: none; color: inherit;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px;
+    transition: border-color .12s, transform .12s;
+  }
+  a.chcard:hover { border-color: var(--accent); transform: translateY(-2px); }
+  a.chcard .k { font-family: "JetBrains Mono", monospace; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+  a.chcard h3 { margin: 6px 0 6px; font-size: 1.1rem; font-family: "Fraunces", Georgia, serif; font-weight: 600; }
+  a.chcard p { margin: 0; font-size: .9rem; color: var(--muted); }
+  a.chcard .go { font-family: "JetBrains Mono", monospace; font-size: .8rem; color: var(--accent-ink); margin-top: 10px; display: inline-block; }
+
+  /* ---------- Dovednosti / přenositelné ---------- */
+  .skillgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .skillcard { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+  .skillcard h4 { margin: 0 0 10px; font-size: .76rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-family: "JetBrains Mono", monospace; }
+  .skillcard ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: .94rem; }
+  .skillcard li::marker { color: var(--faint); }
+
+  .transfer { background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--gold); border-radius: 12px; padding: 18px 20px; }
+  .transfer p { margin: 0 0 10px; max-width: 64ch; }
+  .transfer p:last-child { margin: 0; }
+  .transfer b { color: var(--fg); }
+
+  .did { margin: 0 0 18px; padding: 0; list-style: none; display: grid; gap: 9px; }
+  .did li { display: flex; gap: 10px; font-size: .96rem; }
+  .did li::before { content: "✓"; color: var(--done); font-weight: 700; flex: none; }
+
+  .contact { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+  .contact .row { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: .96rem; }
+  .contact .row span { color: var(--muted); }
+  .contact .row b { font-weight: 600; }
+
+  .btnrow { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+  .btn {
+    font-family: "Hanken Grotesk"; font-weight: 600; font-size: .9rem; text-decoration: none;
+    color: var(--accent-ink); background: var(--accent-bg); border: 1px solid transparent;
+    padding: 9px 14px; border-radius: 9px;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn .ar { font-family: "JetBrains Mono", monospace; }
+
+  /* ---------- Nálezy (ruční testy) ---------- */
+  .finding { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 18px 6px; margin-bottom: 16px; }
+  .finding > header { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
+  .finding h3 { font-weight: 700; font-size: 1.06rem; margin: 0; display: flex; align-items: baseline; gap: 9px; }
+  .finding h3 .id { font-family: "JetBrains Mono", monospace; font-size: .8rem; color: var(--accent); font-weight: 600; }
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; }
+  .badge { font-family: "JetBrains Mono", monospace; font-size: .68rem; letter-spacing: .04em; padding: 3px 9px; border-radius: 999px; font-weight: 600; white-space: nowrap; }
+  .badge.sev-high { background: var(--bad-bg); color: var(--bad); }
+  .badge.sev-mid { background: var(--warn-bg); color: var(--warn); }
+  .badge.sev-low { background: var(--surface-2); color: var(--muted); border: 1px solid var(--border); }
+  .badge.state { background: var(--done-bg); color: var(--done); }
+  .badge.lens { background: var(--surface-2); color: var(--muted); border: 1px solid var(--border); }
+  .finding dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; margin: 12px 0 14px; font-size: .93rem; }
+  .finding dt { font-family: "JetBrains Mono", monospace; font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); padding-top: 3px; white-space: nowrap; }
+  .finding dd { margin: 0 0 7px; }
+  .finding dd.real { color: var(--bad); }
+  .finding dd.exp { color: var(--done); }
+  .finding .fix { border-top: 1px dashed var(--border); padding: 10px 0 12px; font-size: .9rem; color: var(--muted); display: flex; gap: 8px; align-items: flex-start; }
+  .finding .fix b { color: var(--fg); font-weight: 600; }
+
+  /* ---------- Tabulky ---------- */
+  .tablebox { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; min-width: 560px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  thead th { font-family: "JetBrains Mono", monospace; font-size: .68rem; letter-spacing: .05em; text-transform: uppercase; color: var(--faint); background: var(--surface-2); white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.mono { font-family: "JetBrains Mono", monospace; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .m { font-family: "JetBrains Mono", monospace; font-weight: 600; font-size: .72rem; padding: 2px 7px; border-radius: 5px; background: var(--mono-bg); color: var(--accent-ink); }
+  .sc { font-family: "JetBrains Mono", monospace; font-variant-numeric: tabular-nums; }
+  .pass { color: var(--done); font-weight: 700; white-space: nowrap; }
+  .pill { font-family: "JetBrains Mono", monospace; font-weight: 600; font-size: .72rem; padding: 2px 8px; border-radius: 20px; white-space: nowrap; display: inline-block; }
+  .pill.ok { background: var(--done-bg); color: var(--done); }
+  .pill.no { background: var(--bad-bg); color: var(--bad); }
+  .pill.mid { background: var(--warn-bg); color: var(--warn); }
+
+  .codes { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 6px 0 4px; }
+  .code { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: .9rem; }
+  .code b { font-family: "JetBrains Mono", monospace; }
+  .code.c2 b { color: var(--done); }
+  .code.c4 b { color: var(--warn); }
+  .code.c5 b { color: var(--bad); }
+
+  /* ---------- SQL bloky ---------- */
+  .tool { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 18px 14px; margin-bottom: 14px; }
+  .tool h3 { margin: 0 0 2px; font-size: 1.05rem; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .tool h3 code, .inline-code { font-family: "JetBrains Mono", monospace; font-size: .85rem; background: var(--mono-bg); color: var(--accent-ink); padding: 2px 8px; border-radius: 6px; font-weight: 600; }
+  .tool .what { color: var(--muted); font-size: .92rem; margin: 6px 0 12px; }
+  .sql { position: relative; background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px; margin: 0 0 10px; overflow: hidden; }
+  .sql pre { margin: 0; padding: 14px 16px; padding-right: 96px; overflow-x: auto; font-family: "JetBrains Mono", monospace; font-size: .88rem; line-height: 1.5; color: var(--fg); }
+  .sql .kw { color: var(--accent-ink); font-weight: 600; }
+  .copy { position: absolute; top: 8px; right: 8px; font-family: "JetBrains Mono", monospace; font-size: .7rem; letter-spacing: .04em; padding: 5px 9px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; transition: color .12s, border-color .12s; }
+  .copy:hover { color: var(--accent); border-color: var(--accent); }
+  .copy:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .copy.done { color: var(--done); border-color: var(--done); }
+  .result { font-family: "JetBrains Mono", monospace; font-size: .82rem; color: var(--muted); margin: 0 0 4px; }
+  .result b { color: var(--fg); font-weight: 600; }
+  .trap { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--bad); border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; }
+  .trap .tag { font-family: "JetBrains Mono", monospace; font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; color: var(--bad); margin: 0 0 8px; }
+  .trap h3 { margin: 0 0 6px; font-size: 1.02rem; }
+  .trap p { font-size: .92rem; color: var(--muted); margin: 8px 0 0; max-width: 64ch; }
+  .trap p b { color: var(--fg); }
+  code.c { font-family: "JetBrains Mono", monospace; font-size: .85em; background: var(--mono-bg); border-radius: 5px; padding: 1px 5px; }
+
+  /* ---------- Testovací případy ---------- */
+  .tc { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
+  .tc-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .tc-id { font-family: "JetBrains Mono", monospace; font-weight: 600; font-size: .8rem; color: var(--accent-ink); background: var(--mono-bg); padding: 3px 9px; border-radius: 6px; }
+  .tc-name { font-weight: 700; font-size: 1.02rem; flex: 1; min-width: 0; }
+  .type { font-family: "JetBrains Mono", monospace; font-weight: 600; font-size: .68rem; letter-spacing: .04em; text-transform: uppercase; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+  .type.pos { background: var(--done-bg); color: var(--done); }
+  .type.neg { background: var(--bad-bg); color: var(--bad); }
+  .type.bound { background: var(--warn-bg); color: var(--warn); }
+  .rows { display: grid; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .trow { display: grid; grid-template-columns: 136px 1fr; gap: 1px; background: var(--border); }
+  .trow > div { background: var(--surface); padding: 9px 12px; }
+  .trow .k { font-family: "JetBrains Mono", monospace; font-size: .68rem; letter-spacing: .05em; text-transform: uppercase; color: var(--faint); }
+  .trow .v { font-size: .92rem; }
+  .trow .v ol { margin: 0; padding-left: 18px; }
+  .trow .v .data { font-family: "JetBrains Mono", monospace; font-size: .82rem; }
+  .trow .v em { color: var(--muted); font-style: italic; }
+  .trow.exp .v { font-weight: 600; }
+  @media (max-width: 460px) { .trow { grid-template-columns: 1fr; } .trow .k { padding-bottom: 2px; } }
+
+  .insight { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; }
+  .insight h3 { margin: 0 0 6px; font-size: 1.02rem; }
+  .insight p { font-size: .92rem; color: var(--muted); margin: 6px 0 0; max-width: 64ch; }
+  .insight p b { color: var(--fg); }
+
+  .note { background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 10px; padding: 14px 16px; font-size: .92rem; color: var(--muted); margin: 18px 0; }
+  .note b { color: var(--fg); }
+
+  ul.skills { list-style: none; padding: 0; margin: 10px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+  ul.skills li { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 11px 14px; font-size: .92rem; }
+  ul.skills b { font-family: "Hanken Grotesk"; }
+  ul.lenses { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 10px; }
+  ul.lenses li { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: .93rem; }
+  ul.lenses b { font-family: "Hanken Grotesk"; }
+
+  footer { margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--border); font-size: .84rem; color: var(--faint); font-family: "JetBrains Mono", monospace; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } a.chcard:hover { transform: none; } }
+</style>
+</head>
+<body>
+
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#uvod">Tomáš Halama<span class="dot">.</span></a>
+    <nav class="nav" aria-label="Kapitoly">
+      <a href="#uvod" data-sec="uvod">Úvod</a>
+      <a href="#rucni" data-sec="rucni">Ruční testování</a>
+      <a href="#api" data-sec="api">API</a>
+      <a href="#sql" data-sec="sql">SQL</a>
+      <a href="#pripady" data-sec="pripady">Testovací případy</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ============ ÚVOD ============ -->
+  <section id="sec-uvod">
+    <p class="eyebrow">Portfolio · softwarové testování</p>
+    <h1>Tomáš Halama</h1>
+    <p class="role"><b>Tester</b> · přechod z procesní a datové role do IT</p>
+    <p class="pitch">
+      Posouvám se do testování softwaru po <b>7 letech v koordinaci procesů, operations a účetnictví</b> —
+      z práce, kde se denně hlídá přesnost dat, dodržují se postupy a problémy se jasně reportují.
+      Komerční praxi v testování zatím nemám, zato mám za sebou <b>kompletní cyklus na reálné aplikaci</b>:
+      od ručního hledání chyb přes bug reporty a API testy až po ověřování dat v databázi a návrh testovacích případů.
+    </p>
+    <div class="btnrow">
+      <a class="btn" href="aplikace/">Živá testovaná aplikace <span class="ar">→</span></a>
+    </div>
+
+    <h2>Co je uvnitř</h2>
+    <p class="sub">Čtyři ukázky odvedené práce. Klikni na kapitolu nebo použij menu nahoře.</p>
+    <div class="chapters">
+      <a class="chcard" href="#rucni">
+        <span class="k">01 · Ruční testy</span>
+        <h3>Ruční testování</h3>
+        <p>6 nálezů z explorativního testování, bug reporty se severitou a re-testem.</p>
+        <span class="go">Otevřít →</span>
+      </a>
+      <a class="chcard" href="#api">
+        <span class="k">02 · API</span>
+        <h3>API testování</h3>
+        <p>6 testů REST API — metody, stavové kódy, pozitivní i negativní případy.</p>
+        <span class="go">Otevřít →</span>
+      </a>
+      <a class="chcard" href="#sql">
+        <span class="k">03 · Data</span>
+        <h3>SQL pro testery</h3>
+        <p>Ověřování dat u zdroje pravdy — základní dotazy a tři pasti.</p>
+        <span class="go">Otevřít →</span>
+      </a>
+      <a class="chcard" href="#pripady">
+        <span class="k">04 · Analýza</span>
+        <h3>Testovací případy</h3>
+        <p>Systematická sada TC-01 až TC-05: pozitivní, negativní, hraniční.</p>
+        <span class="go">Otevřít →</span>
+      </a>
+    </div>
+
+    <h2>Dovednosti</h2>
+    <p class="sub">Co konkrétně umím doložit na kapitolách výše.</p>
+    <div class="skillgrid">
+      <div class="skillcard">
+        <h4>Ruční testování</h4>
+        <ul>
+          <li>Explorativní testování</li>
+          <li>Návrh testovacích případů</li>
+          <li>Analýza hraničních hodnot</li>
+          <li>Re-test a regresní kontrola</li>
+        </ul>
+      </div>
+      <div class="skillcard">
+        <h4>Reportování</h4>
+        <ul>
+          <li>Psaní bug reportů</li>
+          <li>Reprodukční kroky</li>
+          <li>Kalibrace severity a priority</li>
+          <li>Odlišení chyba / UX / prostředí</li>
+        </ul>
+      </div>
+      <div class="skillcard">
+        <h4>API &amp; data</h4>
+        <ul>
+          <li>Testování REST API (GET/POST/DELETE)</li>
+          <li>Stavové kódy a tělo odpovědi</li>
+          <li>SQL — SELECT, WHERE, COUNT, ORDER BY</li>
+          <li>Ověření dat vs. zobrazení v appce</li>
+        </ul>
+      </div>
+      <div class="skillcard">
+        <h4>Automatizace (základy)</h4>
+        <ul>
+          <li>Playwright — E2E testy</li>
+          <li>Ochrana proti regresi</li>
+          <li>Čtení výsledků (pass/fail)</li>
+          <li>Základní orientace v HTML</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>Co si nesu z dosavadní praxe</h2>
+    <div class="transfer">
+      <p><b>Pozornost k detailu a přesnost dat.</b> Roky v účetnictví a koordinaci procesů mě naučily všímat si nesrovnalostí a nespoléhat na „asi to sedí". Přesně to dělá tester s každou obrazovkou.</p>
+      <p><b>Procesy a dokumentace.</b> Nastavoval jsem onboarding a předávací protokoly, psal checklisty. Testování je o stejné disciplíně: systematicky, krok za krokem, nic nevynechat.</p>
+      <p><b>Jasný reporting.</b> Zvyk hlásit problémy srozumitelně a přesně — ne „nejde to", ale co, kde a za jakých okolností — je jádro dobrého bug reportu.</p>
+    </div>
+
+  </section>
+
+  <!-- ============ RUČNÍ TESTOVÁNÍ ============ -->
+  <section id="sec-rucni" hidden>
+    <p class="eyebrow">Kapitola 01 · Protokol o testování</p>
+    <h1>Ruční testování</h1>
+    <p class="lede">Nálezy z ručního (explorativního) testování aplikace Evidence údržby jeřábů. Testováno na tabletu (Android), na hostované verzi.</p>
+
+    <dl class="meta">
+      <div><dt>Aplikace</dt><dd>Evidence údržby jeřábů</dd></div>
+      <div><dt>Tester</dt><dd>Tomáš Halama</dd></div>
+      <div><dt>Datum</dt><dd>4. 11. 2026</dd></div>
+      <div><dt>Verze</dt><dd>v3 (po opravách)</dd></div>
+      <div><dt>Metoda</dt><dd>Ruční / explorativní</dd></div>
+      <div><dt>Zařízení</dt><dd>Tablet, Android</dd></div>
+    </dl>
+
+    <h2>Souhrn</h2>
+    <div class="stats">
+      <div class="stat"><div class="num">6</div><div class="lab">nálezů celkem</div></div>
+      <div class="stat"><div class="num">4</div><div class="lab">nachystané chyby (4/4)</div></div>
+      <div class="stat"><div class="num">2</div><div class="lab">vlastní nálezy</div></div>
+      <div class="stat ok"><div class="num">6</div><div class="lab">vyřešeno</div></div>
+    </div>
+    <div class="note"><b>Výsledek:</b> Všech 6 nálezů bylo opraveno a následně <b>přetestováno</b> (re-test) a ověřeno proti <b>regresi</b> (že oprava nerozbila jiné funkce).</div>
+
+    <h2>Nálezy</h2>
+
+    <article class="finding">
+      <header>
+        <h3><span class="id">BUG-01</span> Filtr „Nevyhověl" zobrazoval i „S výhradami"</h3>
+        <div class="badges"><span class="badge sev-mid">severita: střední</span><span class="badge state">✓ opraveno</span></div>
+      </header>
+      <dl>
+        <dt>Čočka</dt><dd><span class="badge lens">happy path</span></dd>
+        <dt>Kroky</dt><dd>Seznam → Filtr výsledku → zvolit „Nevyhověl".</dd>
+        <dt>Očekávání</dt><dd class="exp">Zobrazí se pouze záznamy s výsledkem „Nevyhověl".</dd>
+        <dt>Realita</dt><dd class="real">Zobrazily se i záznamy „S výhradami".</dd>
+      </dl>
+      <div class="fix"><span>🛠️</span><span><b>Oprava:</b> Z podmínky filtru odstraněno chybné přidávání „S výhradami" k výsledku „Nevyhověl".</span></div>
+    </article>
+
+    <article class="finding">
+      <header>
+        <h3><span class="id">BUG-02</span> Formulář šel odeslat bez jména technika</h3>
+        <div class="badges"><span class="badge sev-mid">severita: střední</span><span class="badge state">✓ opraveno</span></div>
+      </header>
+      <dl>
+        <dt>Čočka</dt><dd><span class="badge lens">validace</span></dd>
+        <dt>Kroky</dt><dd>Vyplnit jeřáb + datum, pole „Technik" (povinné <code class="c">*</code>) nechat prázdné, odeslat.</dd>
+        <dt>Očekávání</dt><dd class="exp">Formulář nepůjde odeslat, upozorní na povinné pole.</dd>
+        <dt>Realita</dt><dd class="real">Záznam se uložil i bez technika, přestože je pole označeno jako povinné.</dd>
+      </dl>
+      <div class="fix"><span>🛠️</span><span><b>Oprava:</b> Do kontroly povinných polí doplněna i podmínka na jméno technika.</span></div>
+    </article>
+
+    <article class="finding">
+      <header>
+        <h3><span class="id">BUG-03</span> Počet záznamů se po smazání neaktualizoval</h3>
+        <div class="badges"><span class="badge sev-mid">severita: střední</span><span class="badge state">✓ opraveno</span></div>
+      </header>
+      <dl>
+        <dt>Čočka</dt><dd><span class="badge lens">stav po akci</span></dd>
+        <dt>Kroky</dt><dd>Smazat všechny záznamy a sledovat údaj „Počet záznamů".</dd>
+        <dt>Očekávání</dt><dd class="exp">Počet klesá, u prázdného seznamu ukazuje 0.</dd>
+        <dt>Realita</dt><dd class="real">Počet zůstal na původní hodnotě (číslo „lhalo").</dd>
+      </dl>
+      <div class="fix"><span>🛠️</span><span><b>Oprava:</b> Po smazání se počítadlo přepočítá podle skutečného počtu záznamů.</span></div>
+    </article>
+
+    <article class="finding">
+      <header>
+        <h3><span class="id">BUG-04</span> Varování „blíží se revize" jen 3 dny dopředu</h3>
+        <div class="badges"><span class="badge sev-mid">severita: střední</span><span class="badge state">✓ opraveno</span></div>
+      </header>
+      <dl>
+        <dt>Čočka</dt><dd><span class="badge lens">hraniční případy</span></dd>
+        <dt>Kroky</dt><dd>Přidat revizi s příští revizí za ~20 dní.</dd>
+        <dt>Očekávání</dt><dd class="exp">Řádek se zvýrazní jako blížící se (rozumný předstih).</dd>
+        <dt>Realita</dt><dd class="real">Appka upozornila jen 3 dny předem; revize za 20 dní se nezvýraznila.</dd>
+      </dl>
+      <div class="fix"><span>🛠️</span><span><b>Oprava:</b> Práh upozornění změněn ze <code class="c">3</code> na <code class="c">30</code> dní. <b>Pozn. testera:</b> 3denní předstih je u revize jeřábu provozně nebezpečný — nestihne se objednat termín.</span></div>
+    </article>
+
+    <article class="finding">
+      <header>
+        <h3><span class="id">OBS-05</span> Prošlá revize hlásila „blíží se" místo „po termínu"</h3>
+        <div class="badges"><span class="badge sev-mid">severita: střední</span><span class="badge state">✓ vyřešeno</span></div>
+      </header>
+      <dl>
+        <dt>Typ</dt><dd><span class="badge lens">správnost / UX</span> · vlastní nález</dd>
+        <dt>Kroky</dt><dd>Zadat příští revizi s datem v minulosti.</dd>
+        <dt>Očekávání</dt><dd class="exp">Rozlišení „po termínu" (prošlé) a „blíží se" (budoucí).</dd>
+        <dt>Realita</dt><dd class="real">U prošlého data svítilo „blíží se" — zavádějící u bezpečnostní evidence.</dd>
+      </dl>
+      <div class="fix"><span>🛠️</span><span><b>Oprava:</b> Prošlé revize nově hlásí červené <b>„⚠ po termínu"</b>, budoucí do 30 dní „⚠ blíží se". Doporučení testera přijato.</span></div>
+    </article>
+
+    <article class="finding">
+      <header>
+        <h3><span class="id">OBS-06</span> Kalendář u data se neotevřel kliknutím do pole</h3>
+        <div class="badges"><span class="badge sev-low">severita: nízká</span><span class="badge state">✓ vylepšeno</span></div>
+      </header>
+      <dl>
+        <dt>Typ</dt><dd><span class="badge lens">použitelnost</span> · vlastní nález</dd>
+        <dt>Kroky</dt><dd>Klepnout doprostřed pole „Datum revize".</dd>
+        <dt>Očekávání</dt><dd class="exp">Otevře se kalendář.</dd>
+        <dt>Realita</dt><dd class="real">Kalendář se otevřel jen po klepnutí na ikonku u pravého okraje.</dd>
+      </dl>
+      <div class="fix"><span>🛠️</span><span><b>Posouzení:</b> Nejde o regresi ani chybu kódu — jde o <b>výchozí chování prohlížeče</b>. Přesto nahlášeno jako brzda pro uživatele. <b>Vylepšení:</b> kalendář se nově otevře klepnutím kamkoliv do pole.</span></div>
+    </article>
+
+    <div class="note"><b>Poznámka k prostředí:</b> Zdálo se, že appka „nepamatuje" záznamy po zavření. Prověřením se ukázalo, že nešlo o chybu kódu, ale o <b>chování prostředí</b> (ukládání u lokálního souboru na Androidu je nespolehlivé). Na hostované verzi vše funguje. → <b>Chybu je potřeba odlišit od vlivu prostředí</b> dřív, než se nahlásí.</div>
+
+    <h2>Použitá metodika</h2>
+    <p class="sub">Záznamy se procházely systematicky přes čtyři „čočky", aby se pokrylo víc než jen běžný průchod:</p>
+    <ul class="lenses">
+      <li><b>Happy path</b> — chová se appka správně při běžném, očekávaném použití?</li>
+      <li><b>Validace</b> — co se stane při prázdných, neúplných nebo nevalidních vstupech?</li>
+      <li><b>Hraniční případy</b> — krajní hodnoty: data v minulosti, těsně před/po termínu, dlouhé texty.</li>
+      <li><b>Stav po akci</b> — je po smazání/přidání vše v souladu (počítadlo, zvýraznění, seznam)?</li>
+    </ul>
+  </section>
+
+  <!-- ============ API ============ -->
+  <section id="sec-api" hidden>
+    <p class="eyebrow">Kapitola 02 · Protokol o testování</p>
+    <h1>API testování</h1>
+    <p class="lede">Testování REST API pro evidenci revizí. Ověřovaly se HTTP metody, stavové kódy a obsah odpovědí přes přímé dotazy na API (bez uživatelského rozhraní).</p>
+
+    <dl class="meta">
+      <div><dt>Předmět</dt><dd>REST API /revize</dd></div>
+      <div><dt>Tester</dt><dd>Tomáš Halama</dd></div>
+      <div><dt>Datum</dt><dd>4. 11. 2026</dd></div>
+      <div><dt>Metody</dt><dd>GET · POST · DELETE</dd></div>
+      <div><dt>Ověřeno</dt><dd>stav + tělo odpovědi</dd></div>
+      <div><dt>Případů</dt><dd>6</dd></div>
+    </dl>
+
+    <h2>Souhrn</h2>
+    <div class="stats">
+      <div class="stat"><div class="num">6</div><div class="lab">testovacích případů</div></div>
+      <div class="stat"><div class="num">3</div><div class="lab">metody</div></div>
+      <div class="stat ok"><div class="num">6</div><div class="lab">API se chovalo správně</div></div>
+      <div class="stat"><div class="num">1</div><div class="lab">doporučení (konvence)</div></div>
+    </div>
+
+    <h2>Stavové kódy — semafor</h2>
+    <div class="codes">
+      <div class="code c2"><b>2xx</b> — úspěch (<code class="c">200</code> OK, <code class="c">201</code> vytvořeno, <code class="c">204</code> hotovo)</div>
+      <div class="code c4"><b>4xx</b> — chyba žadatele (<code class="c">400</code> špatný dotaz, <code class="c">404</code> nenalezeno)</div>
+      <div class="code c5"><b>5xx</b> — chyba serveru (<code class="c">500</code>)</div>
+    </div>
+
+    <h2>Testovací případy</h2>
+    <div class="tablebox">
+      <table>
+        <thead>
+          <tr><th>#</th><th>Dotaz</th><th>Vstup / záměr</th><th>Pohled</th><th>Oček.</th><th>Skutečnost</th><th>Výsledek</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td><span class="m">GET</span> /revize/3</td><td>Načíst existující revizi (Demag)</td><td>pozitivní</td><td class="sc">200</td><td class="sc">200 + Demag</td><td class="pass">PASS ✅</td></tr>
+          <tr><td>2</td><td><span class="m">POST</span> /revize</td><td>Uložit bez povinných polí</td><td>negativní</td><td class="sc">400</td><td class="sc">400</td><td class="pass">PASS ✅</td></tr>
+          <tr><td>3</td><td><span class="m">DELETE</span> /revize/2</td><td>Smazat existující revizi (Tatra)</td><td>pozitivní</td><td class="sc">204</td><td class="sc">204</td><td class="pass">PASS ✅</td></tr>
+          <tr><td>4</td><td><span class="m">DELETE</span> /revize/7</td><td>Smazat neexistující revizi</td><td>hraniční</td><td class="sc">404</td><td class="sc">404</td><td class="pass">PASS ✅</td></tr>
+          <tr><td>5</td><td><span class="m">GET</span> /revize/99</td><td>Načíst neexistující revizi</td><td>hraniční</td><td class="sc">404</td><td class="sc">404</td><td class="pass">PASS ✅</td></tr>
+          <tr><td>6</td><td><span class="m">POST</span> /revize</td><td>Uložit kompletně vyplněnou revizi</td><td>pozitivní</td><td class="sc">201</td><td class="sc">201 + nový záznam</td><td class="pass">PASS ✅</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><b>Doporučení (ne chyba):</b> U případu 6 je očekávaný kód <code class="c">201 Created</code> — konvence pro vytvoření nového záznamu přes <code class="c">POST</code>. Obecné <code class="c">200 OK</code> by nebylo tvrdou chybou, ale nedodržením konvence → drobné doporučení, nikoliv bug.</div>
+  </section>
+
+  <!-- ============ SQL ============ -->
+  <section id="sec-sql" hidden>
+    <p class="eyebrow">Kapitola 03 · Testování dat</p>
+    <h1>SQL pro testery</h1>
+    <p class="lede">Ověřování dat přímo u zdroje pravdy. Aplikace může zobrazit cokoli — co se ve skutečnosti uložilo, zjistí tester dotazem do databáze.</p>
+
+    <dl class="meta">
+      <div><dt>Databáze</dt><dd>SQLite · tabulka revize</dd></div>
+      <div><dt>Tester</dt><dd>Tomáš Halama</dd></div>
+      <div><dt>Datum</dt><dd>5. 11. 2026</dd></div>
+      <div><dt>Nástroje</dt><dd>SELECT · WHERE · COUNT · ORDER BY</dd></div>
+      <div><dt>Záznamů</dt><dd>6 revizí</dd></div>
+      <div><dt>Pasti</dt><dd>3 odhalené</dd></div>
+    </dl>
+
+    <h2>Datová sada</h2>
+    <p class="sub">Tabulka <span class="inline-code">revize</span> — ber ji jako Excel se sloupci.</p>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>id</th><th>jerab</th><th>datum</th><th>technik</th><th>vysledek</th><th>dalsi_revize</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">1</td><td>Liebherr LTM 1050</td><td class="mono">2026-09-10</td><td>Novák</td><td><span class="pill ok">Vyhověl</span></td><td class="mono">2027-09-10</td></tr>
+          <tr><td class="mono">2</td><td>Tatra AD 28</td><td class="mono">2026-10-02</td><td>Svoboda</td><td><span class="pill mid">S výhradami</span></td><td class="mono">2026-11-24</td></tr>
+          <tr><td class="mono">3</td><td>Demag AC 40</td><td class="mono">2026-07-18</td><td>Dvořák</td><td><span class="pill no">Nevyhověl</span></td><td class="mono">2026-10-25</td></tr>
+          <tr><td class="mono">4</td><td>Grove GMK 3050</td><td class="mono">2026-11-01</td><td>Horák</td><td><span class="pill ok">Vyhověl</span></td><td class="mono">2027-11-01</td></tr>
+          <tr><td class="mono">5</td><td>Liebherr LTM 1090</td><td class="mono">2026-08-15</td><td>Novák</td><td><span class="pill no">Nevyhověl</span></td><td class="mono">2026-11-30</td></tr>
+          <tr><td class="mono">6</td><td>Tatra AD 20</td><td class="mono">2026-10-20</td><td>Svoboda</td><td><span class="pill ok">Vyhověl</span></td><td class="mono">2027-04-20</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Taška dotazů</h2>
+    <div class="tool">
+      <h3>1 · Vytáhni data <code>SELECT</code></h3>
+      <p class="what">Základ všeho — vrať mi řádky. <code>SELECT *</code> znamená „všechny sloupce".</p>
+      <div class="sql"><button class="copy" type="button">Kopírovat</button><pre><span class="kw">SELECT</span> * <span class="kw">FROM</span> revize</pre></div>
+      <p class="result">→ <b>6 řádků</b> — celá tabulka.</p>
+    </div>
+    <div class="tool">
+      <h3>2 · Filtr <code>WHERE</code></h3>
+      <p class="what">Jen řádky, které splní podmínku. Tady: které jeřáby u revize neprošly.</p>
+      <div class="sql"><button class="copy" type="button">Kopírovat</button><pre><span class="kw">SELECT</span> * <span class="kw">FROM</span> revize <span class="kw">WHERE</span> vysledek = 'Nevyhověl'</pre></div>
+      <p class="result">→ <b>2 řádky</b> — Demag AC 40 (Dvořák) · Liebherr LTM 1090 (Novák).</p>
+    </div>
+    <div class="tool">
+      <h3>3 · Kolik jich je <code>COUNT(*)</code></h3>
+      <p class="what">Nevrací řádky, ale jedno číslo. Na ověřování počtů, které hlásí aplikace.</p>
+      <div class="sql"><button class="copy" type="button">Kopírovat</button><pre><span class="kw">SELECT</span> <span class="kw">COUNT</span>(*) <span class="kw">FROM</span> revize <span class="kw">WHERE</span> technik = 'Novák'</pre></div>
+      <p class="result">→ <b>2</b> — tolik revizí dělal technik Novák.</p>
+    </div>
+    <div class="tool">
+      <h3>4 · Seřaď <code>ORDER BY</code></h3>
+      <p class="what">Pořadí výpisu. Vzestupně automaticky, sestupně přes <span class="inline-code">DESC</span>.</p>
+      <div class="sql"><button class="copy" type="button">Kopírovat</button><pre><span class="kw">SELECT</span> * <span class="kw">FROM</span> revize <span class="kw">ORDER BY</span> technik</pre></div>
+      <p class="result">→ <b>6 řádků</b> podle abecedy: Dvořák → Horák → Novák → Novák → Svoboda → Svoboda.</p>
+    </div>
+
+    <h2>Tři pasti, které tester musí znát</h2>
+    <p class="sub">Nejcennější část — každou jsem potkal naživo při psaní dotazů výše.</p>
+    <div class="trap">
+      <p class="tag">Past 1 · Velikost písmen &amp; diakritika</p>
+      <h3>Databáze porovnává text úplně přesně</h3>
+      <div class="sql"><button class="copy" type="button">Kopírovat</button><pre><span class="kw">SELECT</span> * <span class="kw">FROM</span> revize <span class="kw">WHERE</span> technik = 'novak'</pre></div>
+      <p class="result">→ <b>0 řádků</b> ❌ · s hodnotou <code class="c">'Novák'</code> → <b>2 řádky</b> ✅</p>
+      <p><code class="c">novak</code> ≠ <code class="c">Novák</code> — liší se velké písmeno i háček, a dotaz vrátí nulu. <b>Pozor:</b> nula tady neznamená „technik neexistuje", ale „hledám špatně napsanou hodnotu". Když má vyhledávání ignorovat velikost a diakritiku a neignoruje je → <b>bug</b>.</p>
+    </div>
+    <div class="trap">
+      <p class="tag">Past 2 · Rozbitý dotaz vs. nula výsledků</p>
+      <h3>Prázdné WHERE není filtr — je to chyba</h3>
+      <div class="sql"><button class="copy" type="button">Kopírovat</button><pre><span class="kw">SELECT</span> <span class="kw">COUNT</span>(*) <span class="kw">FROM</span> revize <span class="kw">WHERE</span></pre></div>
+      <p class="result">→ <b>CHYBA: incomplete input</b> ❌ · bez <code class="c">WHERE</code> → <b>6</b> ✅</p>
+      <p>Buď za <code class="c">WHERE</code> je podmínka, nebo tam <code class="c">WHERE</code> vůbec není. Tester musí rozlišit <b>dotaz proběhl a vrátil 0</b> (data nejsou) od <b>dotaz je špatně napsaný</b> (spadl na syntaxi).</p>
+    </div>
+    <div class="trap">
+      <p class="tag">Past 3 · Řazení textu vs. data</p>
+      <h3>Pozor, jak jsou data uložená</h3>
+      <div class="sql"><button class="copy" type="button">Kopírovat</button><pre><span class="kw">SELECT</span> * <span class="kw">FROM</span> revize <span class="kw">ORDER BY</span> datum</pre></div>
+      <p class="result">→ správné pořadí od nejstaršího po nejnovější.</p>
+      <p>Datum ve formátu <code class="c">2026-09-10</code> se řadí správně i jako text. Ale kdyby bylo uloženo jako <code class="c">10.9.2026</code>, řadilo by se podle prvního znaku a <code class="c">10.9.</code> by skončilo před <code class="c">9.9.</code> Klasická chyba: tlačítko „seřadit podle data" seřadí vizuálně špatně.</p>
+    </div>
+    <div class="note"><b>Myšlení testera v jedné větě:</b> nejdřív zjisti, co se od systému čeká, pak porovnej se skutečností — a skutečnost si ověř u zdroje pravdy, ne jen podle obrazovky.</div>
+  </section>
+
+  <!-- ============ TESTOVACÍ PŘÍPADY ============ -->
+  <section id="sec-pripady" hidden>
+    <p class="eyebrow">Kapitola 04 · Testovací analýza</p>
+    <h1>Testovací případy</h1>
+    <p class="lede">Systematické pokrytí jedné funkce místo náhodného šťourání. Každá situace má svůj případ, jasné kroky a přesný očekávaný výsledek — doložitelné a opakovatelné.</p>
+
+    <dl class="meta">
+      <div><dt>Předmět</dt><dd>Evidence revizí — formulář</dd></div>
+      <div><dt>Funkce</dt><dd>Přidání revize</dd></div>
+      <div><dt>Tester</dt><dd>Tomáš Halama</dd></div>
+      <div><dt>Datum</dt><dd>5. 11. 2026</dd></div>
+      <div><dt>Typy</dt><dd>pozitivní · negativní · hraniční</dd></div>
+      <div><dt>Případů</dt><dd>5 (TC-01 – TC-05)</dd></div>
+    </dl>
+
+    <h2>Souhrn</h2>
+    <div class="stats">
+      <div class="stat"><div class="num">5</div><div class="lab">testovacích případů</div></div>
+      <div class="stat"><div class="num">3</div><div class="lab">typy pokrytí</div></div>
+      <div class="stat"><div class="num">2</div><div class="lab">nalezené nejasnosti v zadání</div></div>
+    </div>
+
+    <h2>TC-01 · Pozitivní</h2>
+    <div class="tc">
+      <div class="tc-head"><span class="tc-id">TC-01</span><span class="tc-name">Přidání revize s kompletně vyplněným formulářem</span><span class="type pos">Pozitivní</span></div>
+      <div class="rows">
+        <div class="trow"><div class="k">Předpoklad</div><div class="v">Jsem na formuláři pro novou revizi</div></div>
+        <div class="trow"><div class="k">Kroky</div><div class="v"><ol><li>Vyplním všechna povinná pole platnými hodnotami</li><li>Kliknu na „Uložit"</li></ol></div></div>
+        <div class="trow"><div class="k">Testovací data</div><div class="v data">jeřáb: Liebherr LTM 1050 · datum: 10. 9. 2026 · technik: Novák · výsledek: Vyhověl</div></div>
+        <div class="trow exp"><div class="k">Očekáváno</div><div class="v">Revize se uloží a objeví se v seznamu</div></div>
+      </div>
+    </div>
+
+    <h2>TC-02 · Negativní</h2>
+    <div class="tc">
+      <div class="tc-head"><span class="tc-id">TC-02</span><span class="tc-name">Uložení revize bez vyplněného technika</span><span class="type neg">Negativní</span></div>
+      <div class="rows">
+        <div class="trow"><div class="k">Předpoklad</div><div class="v">Jsem na formuláři pro novou revizi</div></div>
+        <div class="trow"><div class="k">Kroky</div><div class="v"><ol><li>Vyplním vše kromě pole „technik"</li><li>Kliknu na „Uložit"</li></ol></div></div>
+        <div class="trow"><div class="k">Testovací data</div><div class="v data">jeřáb: Tatra AD 28 · datum: 2. 10. 2026 · technik: <em>prázdné</em> · výsledek: Vyhověl</div></div>
+        <div class="trow exp"><div class="k">Očekáváno</div><div class="v">Záznam se <span class="pill no">neuloží</span>, u pole technik se zobrazí hláška „Pole technik je povinné", záznam se neobjeví v seznamu</div></div>
+      </div>
+    </div>
+
+    <h2>TC-03 – TC-05 · Hraniční</h2>
+    <p class="sub">Analýza hraničních hodnot kolem zlomu „propásnuto / blíží se". Zlom je dnešek (5. 11. 2026), proto se testují tři data těsně kolem něj.</p>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>ID</th><th>Datum další revize</th><th>Pozice</th><th>Očekávaný výsledek</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">TC-03</td><td class="mono">4. 11. 2026</td><td>včera</td><td><span class="pill no">propásnuto</span></td></tr>
+          <tr><td class="mono">TC-04</td><td class="mono">5. 11. 2026</td><td>dnes (hrana)</td><td><span class="pill mid">blíží se</span> — dnešek lze ještě řešit</td></tr>
+          <tr><td class="mono">TC-05</td><td class="mono">6. 11. 2026</td><td>zítra</td><td><span class="pill mid">blíží se</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><b>Proč jen tři hodnoty:</b> když funkce zvládne datum těsně před hranou, na hraně a za ní, lze věřit, že zvládne i libovolné datum dál od ní. Tři cílené testy nahradí stovky náhodných — to je smysl analýzy hraničních hodnot.</div>
+
+    <h2>Dvě věci nad rámec klikání</h2>
+    <div class="insight">
+      <h3>Očekávaný výsledek musí být přesný</h3>
+      <p>„Zobrazí se hláška" nestačí. U TC-02 se ověřují <b>tři</b> věci: hláška se zobrazí, formulář se <b>neuloží</b> a záznam se <b>neobjeví v seznamu</b>. Důvod: aplikace může ukázat hlášku „pole je povinné" <b>a přesto uložit</b>. Volně napsaný očekávaný výsledek by takovou chybu propustil.</p>
+    </div>
+    <div class="insight">
+      <h3>Hledání nejasností v zadání</h3>
+      <p>Dvakrát se ukázalo, že <b>zadání mlčí</b>: (1) má být datum další revize v minulosti vůbec přijato, nebo odmítnuto? (2) Jaká přesně hláška platí v samotný den termínu? Tester si odpověď nevymýšlí — <b>označí nejasnost a ptá se</b>, čímž chytá chyby dřív, než vzniknou.</p>
+    </div>
+  </section>
+
+  <footer>Portfolio · Tomáš Halama · tester · 2026 — jeden web, pět kapitol</footer>
+
+</div>
+
+<script>
+  (function () {
+    var sections = ["uvod", "rucni", "api", "sql", "pripady"];
+    var navLinks = Array.prototype.slice.call(document.querySelectorAll(".nav a"));
+
+    function show(id) {
+      if (sections.indexOf(id) === -1) id = "uvod";
+      sections.forEach(function (s) {
+        var el = document.getElementById("sec-" + s);
+        if (el) el.hidden = (s !== id);
+      });
+      navLinks.forEach(function (a) {
+        a.classList.toggle("active", a.getAttribute("data-sec") === id);
+      });
+      window.scrollTo(0, 0);
+    }
+
+    window.addEventListener("hashchange", function () {
+      show((location.hash || "").replace("#", ""));
+    });
+    show((location.hash || "").replace("#", "") || "uvod");
+
+    // Kopírovací tlačítka u SQL bloků
+    document.querySelectorAll(".sql .copy").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var pre = btn.parentElement.querySelector("pre");
+        var text = pre.innerText;
+        function ok() {
+          btn.textContent = "Zkopírováno"; btn.classList.add("done");
+          setTimeout(function () { btn.textContent = "Kopírovat"; btn.classList.remove("done"); }, 1600);
+        }
+        function select() {
+          var r = document.createRange(); r.selectNodeContents(pre);
+          var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+          btn.textContent = "Označeno — zkopíruj";
+          setTimeout(function () { btn.textContent = "Kopírovat"; }, 2000);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(ok).catch(select);
+        } else { select(); }
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
