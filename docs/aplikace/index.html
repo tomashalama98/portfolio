@@ -396,6 +396,23 @@ function escapeHtml(text) {
 const overlay = document.getElementById("overlay");
 const modalText = document.getElementById("modalText");
 let mazanyId = null;
+let fokusPred = null;   // kam vrátit fokus po zavření okna
+
+function otevriOkno() {
+  fokusPred = document.activeElement;
+  overlay.classList.add("show");
+  document.getElementById("cancelDel").focus();
+}
+
+function zavriOkno() {
+  overlay.classList.remove("show");
+  mazanyId = null;
+  if (fokusPred && document.body.contains(fokusPred)) fokusPred.focus();
+}
+
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape" && overlay.classList.contains("show")) zavriOkno();
+});
 
 tbody.addEventListener("click", function (e) {
   const btn = e.target.closest("[data-del]");
@@ -403,21 +420,17 @@ tbody.addEventListener("click", function (e) {
   mazanyId = Number(btn.getAttribute("data-id"));
   const rec = records.find(r => r.id === mazanyId);
   modalText.textContent = rec ? `Záznam „${rec.jerab}" bude odstraněn.` : "Záznam bude odstraněn.";
-  overlay.classList.add("show");
+  otevriOkno();
 });
 
-document.getElementById("cancelDel").addEventListener("click", function () {
-  overlay.classList.remove("show");
-  mazanyId = null;
-});
+document.getElementById("cancelDel").addEventListener("click", zavriOkno);
 
 document.getElementById("confirmDel").addEventListener("click", function () {
   records = records.filter(r => r.id !== mazanyId);
   ulozData();
   vykresli();
   countEl.textContent = records.length;     // aktualizace počtu i po smazání
-  overlay.classList.remove("show");
-  mazanyId = null;
+  zavriOkno();
 });
 
 /* ---------- Datumová pole: kalendář otevřít kliknutím kamkoliv ---------- */
