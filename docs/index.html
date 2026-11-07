@@ -8,17 +8,17 @@
 <title>Tomáš Halama — tester</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
-  /* Layout: sticky horní lišta s menu + jedna "stránka" na kapitolu (přepínání přes #hash). Identita: teal akcent, krémové neutrály, Fraunces/Hanken/JetBrains. */
+  /* Layout: sticky horní lišta s menu + jedna "stránka" na kapitolu (přepínání přes #hash). Identita: teal akcent, neutrální šedé, Source Sans 3 (+ JetBrains Mono jen na kód). */
   :root {
-    --bg: #f3f1ec;
+    --bg: #f4f5f6;
     --surface: #ffffff;
-    --surface-2: #f7f5f0;
+    --surface-2: #f8f9fa;
     --fg: #20262b;
     --muted: #5f6a72;
     --faint: #8c959c;
-    --border: #e1ddd3;
+    --border: #dfe2e5;
     --accent: #16796a;
     --accent-ink: #0f5a4e;
     --accent-bg: #dcefe9;
@@ -29,7 +29,7 @@
     --warn-bg: #fbeed6;
     --bad: #c23b3b;
     --bad-bg: #f7e3e3;
-    --mono-bg: #ece9e1;
+    --mono-bg: #eceef0;
     --code-bg: #20262b0d;
     color-scheme: light;
   }
@@ -82,8 +82,9 @@
 
   * { box-sizing: border-box; }
   body {
+    font-size: 1.0625rem;
     margin: 0; background: var(--bg); color: var(--fg);
-    font-family: "Hanken Grotesk", system-ui, Arial, sans-serif;
+    font-family: "Source Sans 3", system-ui, Arial, sans-serif;
     line-height: 1.55; -webkit-font-smoothing: antialiased;
   }
   body::before {
@@ -105,7 +106,7 @@
     padding-right: max(16px, env(safe-area-inset-right, 0px));
   }
   .brand {
-    font-family: "Fraunces", Georgia, serif; font-weight: 600; font-size: 1.02rem;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-weight: 700; font-size: 1.02rem;
     color: var(--fg); text-decoration: none; white-space: nowrap; margin-right: auto;
   }
   .brand .dot { color: var(--accent); }
@@ -115,8 +116,7 @@
   }
   .nav::-webkit-scrollbar { display: none; }
   .nav a {
-    font-family: "JetBrains Mono", monospace; font-size: .76rem; letter-spacing: .01em;
-    color: var(--muted); text-decoration: none; padding: 7px 11px; border-radius: 8px; white-space: nowrap;
+    font-family: inherit; font-size: .76rem; color: var(--muted); text-decoration: none; padding: 7px 11px; border-radius: 8px; white-space: nowrap;
   }
   .nav a:hover { color: var(--accent); }
   .nav a.active { color: var(--accent-ink); background: var(--accent-bg); font-weight: 600; }
@@ -131,14 +131,14 @@
 
   /* ---------- Typografie ---------- */
   .eyebrow {
-    font-family: "JetBrains Mono", monospace; font-size: .74rem;
-    letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin: 0 0 10px;
+    font-family: inherit; font-size: .95rem; font-weight: 600;
+     color: var(--accent); margin: 0 0 10px;
   }
   h1 {
-    font-family: "Fraunces", Georgia, serif; font-weight: 600;
-    font-size: clamp(2rem, 5.5vw, 3rem); line-height: 1.05; margin: 0 0 10px; text-wrap: balance;
+    font-family: "Source Sans 3", system-ui, sans-serif; font-weight: 700;
+    font-size: clamp(1.9rem, 5vw, 2.6rem); line-height: 1.15; letter-spacing: -.01em; margin: 0 0 10px; text-wrap: balance;
   }
-  h2 { font-family: "Fraunces", Georgia, serif; font-weight: 600; font-size: 1.4rem; margin: 36px 0 12px; text-wrap: balance; }
+  h2 { font-family: "Source Sans 3", system-ui, sans-serif; font-weight: 700; font-size: 1.4rem; margin: 36px 0 12px; text-wrap: balance; }
   h3 { text-wrap: balance; }
   .lede { font-size: 1.05rem; color: var(--muted); margin: 0 0 22px; max-width: 62ch; }
   .sub { color: var(--muted); margin: 0 0 18px; max-width: 62ch; }
@@ -155,13 +155,13 @@
   }
   /* flex: buňky posledního řádku se roztáhnou do plné šířky */
   .meta div { flex: 1 1 150px; margin: 0 -1px -1px 0; background: var(--surface); padding: 12px 14px; box-shadow: inset -1px 0 0 var(--border), inset 0 -1px 0 var(--border); }
-  .meta dt { font-family: "JetBrains Mono", monospace; font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); margin: 0 0 3px; }
+  .meta dt { font-family: inherit; font-size: .82rem;  color: var(--faint); margin: 0 0 3px; }
   .meta dd { margin: 0; font-weight: 600; font-size: .95rem; }
 
   /* ---------- Statistiky ---------- */
   .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 8px; }
   .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
-  .stat .num { font-family: "Fraunces", Georgia, serif; font-weight: 700; font-size: 2rem; line-height: 1; font-variant-numeric: tabular-nums; }
+  .stat .num { font-family: "Source Sans 3", system-ui, sans-serif; font-weight: 700; font-size: 2rem; line-height: 1; font-variant-numeric: tabular-nums; }
   .stat .lab { font-size: .82rem; color: var(--muted); margin-top: 6px; }
   .stat.ok .num { color: var(--done); }
   .stat.warn .num { color: var(--warn); }
@@ -173,16 +173,16 @@
     background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px;
     transition: border-color .12s, transform .12s;
   }
-  a.chcard:hover { border-color: var(--accent); transform: translateY(-2px); }
-  a.chcard .k { font-family: "JetBrains Mono", monospace; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
-  a.chcard h3 { margin: 6px 0 6px; font-size: 1.1rem; font-family: "Fraunces", Georgia, serif; font-weight: 600; }
+  a.chcard:hover { border-color: var(--accent); }
+  a.chcard .k { font-family: inherit; font-size: .85rem; font-weight: 600;  color: var(--accent); }
+  a.chcard h3 { margin: 0 0 6px; font-size: 1.1rem; font-family: "Source Sans 3", system-ui, sans-serif; font-weight: 700; }
   a.chcard p { margin: 0; font-size: .9rem; color: var(--muted); }
-  a.chcard .go { font-family: "JetBrains Mono", monospace; font-size: .8rem; color: var(--accent-ink); margin-top: 10px; display: inline-block; }
+  a.chcard .go { font-family: inherit; font-size: .92rem; font-weight: 600; color: var(--accent-ink); margin-top: 10px; display: inline-block; }
 
   /* ---------- Dovednosti / přenositelné ---------- */
   .skillgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
   .skillcard { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
-  .skillcard h4 { margin: 0 0 10px; font-size: .76rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-family: "JetBrains Mono", monospace; }
+  .skillcard h4 { margin: 0 0 10px; font-size: 1rem;  color: var(--accent); font-family: inherit; }
   .skillcard ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: .94rem; }
   .skillcard li::marker { color: var(--faint); }
 
@@ -202,12 +202,12 @@
 
   .btnrow { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
   .btn {
-    font-family: "Hanken Grotesk"; font-weight: 600; font-size: .9rem; text-decoration: none;
+    font-family: inherit; font-weight: 600; font-size: .9rem; text-decoration: none;
     color: var(--accent-ink); background: var(--accent-bg); border: 1px solid transparent;
     padding: 9px 14px; border-radius: 9px;
   }
   .btn:hover { border-color: var(--accent); }
-  .btn .ar { font-family: "JetBrains Mono", monospace; }
+  .btn .ar { font-family: inherit; }
 
   /* ---------- Nálezy (ruční testy) ---------- */
   .finding { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 18px 6px; margin-bottom: 16px; }
@@ -215,14 +215,14 @@
   .finding h3 { font-weight: 700; font-size: 1.06rem; margin: 0; display: flex; align-items: baseline; gap: 9px; }
   .finding h3 .id { font-family: "JetBrains Mono", monospace; font-size: .8rem; color: var(--accent); font-weight: 600; }
   .badges { display: flex; flex-wrap: wrap; gap: 6px; }
-  .badge { font-family: "JetBrains Mono", monospace; font-size: .68rem; letter-spacing: .04em; padding: 3px 9px; border-radius: 999px; font-weight: 600; white-space: nowrap; }
+  .badge { font-family: inherit; font-size: .8rem; padding: 3px 9px; border-radius: 999px; font-weight: 600; white-space: nowrap; }
   .badge.sev-high { background: var(--bad-bg); color: var(--bad); }
   .badge.sev-mid { background: var(--warn-bg); color: var(--warn); }
   .badge.sev-low { background: var(--surface-2); color: var(--muted); border: 1px solid var(--border); }
   .badge.state { background: var(--done-bg); color: var(--done); }
   .badge.lens { background: var(--surface-2); color: var(--muted); border: 1px solid var(--border); }
   .finding dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; margin: 12px 0 14px; font-size: .93rem; }
-  .finding dt { font-family: "JetBrains Mono", monospace; font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); padding-top: 3px; white-space: nowrap; }
+  .finding dt { font-family: inherit; font-size: .85rem;  color: var(--faint); padding-top: 3px; white-space: nowrap; }
   .finding dd { margin: 0 0 7px; }
   .finding dd.real { color: var(--bad); }
   .finding dd.exp { color: var(--done); }
@@ -233,13 +233,13 @@
   .tablebox { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; }
   table { width: 100%; border-collapse: collapse; font-size: .9rem; min-width: 560px; }
   th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
-  thead th { font-family: "JetBrains Mono", monospace; font-size: .68rem; letter-spacing: .05em; text-transform: uppercase; color: var(--faint); background: var(--surface-2); white-space: nowrap; }
+  thead th { font-family: inherit; font-size: .82rem; font-weight: 600;  color: var(--faint); background: var(--surface-2); white-space: nowrap; }
   tbody tr:last-child td { border-bottom: none; }
   td.mono { font-family: "JetBrains Mono", monospace; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .m { font-family: "JetBrains Mono", monospace; font-weight: 600; font-size: .72rem; padding: 2px 7px; border-radius: 5px; background: var(--mono-bg); color: var(--accent-ink); }
   .sc { font-family: "JetBrains Mono", monospace; font-variant-numeric: tabular-nums; }
   .pass { color: var(--done); font-weight: 700; white-space: nowrap; }
-  .pill { font-family: "JetBrains Mono", monospace; font-weight: 600; font-size: .72rem; padding: 2px 8px; border-radius: 20px; white-space: nowrap; display: inline-block; }
+  .pill { font-family: inherit; font-weight: 600; font-size: .82rem; padding: 2px 8px; border-radius: 20px; white-space: nowrap; display: inline-block; }
   .pill.ok { background: var(--done-bg); color: var(--done); }
   .pill.no { background: var(--bad-bg); color: var(--bad); }
   .pill.mid { background: var(--warn-bg); color: var(--warn); }
@@ -259,14 +259,14 @@
   .sql { position: relative; background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px; margin: 0 0 10px; overflow: hidden; }
   .sql pre { margin: 0; padding: 14px 16px; padding-right: 96px; overflow-x: auto; font-family: "JetBrains Mono", monospace; font-size: .88rem; line-height: 1.5; color: var(--fg); }
   .sql .kw { color: var(--accent-ink); font-weight: 600; }
-  .copy { position: absolute; top: 8px; right: 8px; font-family: "JetBrains Mono", monospace; font-size: .7rem; letter-spacing: .04em; padding: 5px 9px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; transition: color .12s, border-color .12s; }
+  .copy { position: absolute; top: 8px; right: 8px; font-family: inherit; font-size: .82rem; padding: 5px 9px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; transition: color .12s, border-color .12s; }
   .copy:hover { color: var(--accent); border-color: var(--accent); }
   .copy:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .copy.done { color: var(--done); border-color: var(--done); }
-  .result { font-family: "JetBrains Mono", monospace; font-size: .82rem; color: var(--muted); margin: 0 0 4px; }
+  .result { font-family: inherit; font-size: .82rem; color: var(--muted); margin: 0 0 4px; }
   .result b { color: var(--fg); font-weight: 600; }
   .trap { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--bad); border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; }
-  .trap .tag { font-family: "JetBrains Mono", monospace; font-size: .68rem; letter-spacing: .06em; text-transform: uppercase; color: var(--bad); margin: 0 0 8px; }
+  .trap .tag { font-family: inherit; font-size: .85rem; font-weight: 600;  color: var(--bad); margin: 0 0 8px; }
   .trap h3 { margin: 0 0 6px; font-size: 1.02rem; }
   .trap p { font-size: .92rem; color: var(--muted); margin: 8px 0 0; max-width: 64ch; }
   .trap p b { color: var(--fg); }
@@ -277,14 +277,14 @@
   .tc-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
   .tc-id { font-family: "JetBrains Mono", monospace; font-weight: 600; font-size: .8rem; color: var(--accent-ink); background: var(--mono-bg); padding: 3px 9px; border-radius: 6px; }
   .tc-name { font-weight: 700; font-size: 1.02rem; flex: 1; min-width: 0; }
-  .type { font-family: "JetBrains Mono", monospace; font-weight: 600; font-size: .68rem; letter-spacing: .04em; text-transform: uppercase; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+  .type { font-family: inherit; font-weight: 600; font-size: .8rem;  padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
   .type.pos { background: var(--done-bg); color: var(--done); }
   .type.neg { background: var(--bad-bg); color: var(--bad); }
   .type.bound { background: var(--warn-bg); color: var(--warn); }
   .rows { display: grid; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
   .trow { display: grid; grid-template-columns: 136px 1fr; gap: 1px; background: var(--border); }
   .trow > div { background: var(--surface); padding: 9px 12px; }
-  .trow .k { font-family: "JetBrains Mono", monospace; font-size: .68rem; letter-spacing: .05em; text-transform: uppercase; color: var(--faint); }
+  .trow .k { font-family: inherit; font-size: .85rem;  color: var(--faint); }
   .trow .v { font-size: .92rem; }
   .trow .v ol { margin: 0; padding-left: 18px; }
   .trow .v .data { font-family: "JetBrains Mono", monospace; font-size: .82rem; }
@@ -303,10 +303,10 @@
 
   ul.skills { list-style: none; padding: 0; margin: 10px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
   ul.skills li { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 11px 14px; font-size: .92rem; }
-  ul.skills b { font-family: "Hanken Grotesk"; }
+  ul.skills b { font-family: inherit; }
   ul.lenses { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 10px; }
   ul.lenses li { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: .93rem; }
-  ul.lenses b { font-family: "Hanken Grotesk"; }
+  ul.lenses b { font-family: inherit; }
 
   footer { margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--border); font-size: .84rem; color: var(--faint); font-family: "JetBrains Mono", monospace; }
 
@@ -318,7 +318,7 @@
 
 <header class="topbar">
   <div class="topbar-inner">
-    <a class="brand" href="#uvod">Tomáš Halama<span class="dot">.</span></a>
+    <a class="brand" href="#uvod">Tomáš Halama</a>
     <nav class="nav" aria-label="Kapitoly">
       <a href="#uvod" data-sec="uvod">Úvod</a>
       <a href="#rucni" data-sec="rucni">Ruční testování</a>
@@ -350,25 +350,21 @@
     <p class="sub">Čtyři ukázky odvedené práce. Klikni na kapitolu nebo použij menu nahoře.</p>
     <div class="chapters">
       <a class="chcard" href="#rucni">
-        <span class="k">01 · Ruční testy</span>
         <h3>Ruční testování</h3>
         <p>6 nálezů z explorativního testování, bug reporty se severitou a re-testem.</p>
         <span class="go">Otevřít →</span>
       </a>
       <a class="chcard" href="#api">
-        <span class="k">02 · API</span>
         <h3>API testování</h3>
         <p>6 testů REST API — metody, stavové kódy, pozitivní i negativní případy.</p>
         <span class="go">Otevřít →</span>
       </a>
       <a class="chcard" href="#sql">
-        <span class="k">03 · Data</span>
         <h3>SQL pro testery</h3>
         <p>Ověřování dat u zdroje pravdy — základní dotazy a tři pasti.</p>
         <span class="go">Otevřít →</span>
       </a>
       <a class="chcard" href="#pripady">
-        <span class="k">04 · Analýza</span>
         <h3>Testovací případy</h3>
         <p>Systematická sada TC-01 až TC-05: pozitivní, negativní, hraniční.</p>
         <span class="go">Otevřít →</span>
