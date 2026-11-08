@@ -311,6 +311,13 @@
   footer { margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--border); font-size: .84rem; color: var(--faint); font-family: "JetBrains Mono", monospace; }
 
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } a.chcard:hover { transform: none; } }
+  /* Snímky obrazovky u nálezu v Jiře */
+  .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 14px 0 6px; }
+  .shot { margin: 0; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .shot img { display: block; width: 100%; height: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+  .shot figcaption { font-size: .82rem; color: var(--muted); }
+  .shot figcaption b { color: var(--fg); }
+  .shot.wide { margin: 14px 0 6px; }
 </style>
 </head>
 <body>
@@ -325,6 +332,7 @@
       <a href="#api" data-sec="api">API</a>
       <a href="#sql" data-sec="sql">SQL</a>
       <a href="#pripady" data-sec="pripady">Testovací případy</a>
+      <a href="#jira" data-sec="jira">Jira</a>
     </nav>
   </div>
 </header>
@@ -347,7 +355,7 @@
     </div>
 
     <h2>Co je uvnitř</h2>
-    <p class="sub">Čtyři ukázky odvedené práce. Klikni na kapitolu nebo použij menu nahoře.</p>
+    <p class="sub">Pět ukázek odvedené práce. Klikni na kapitolu nebo použij menu nahoře.</p>
     <div class="chapters">
       <a class="chcard" href="#rucni">
         <h3>Ruční testování</h3>
@@ -367,6 +375,11 @@
       <a class="chcard" href="#pripady">
         <h3>Testovací případy</h3>
         <p>Systematická sada TC-01 až TC-05: pozitivní, negativní, hraniční.</p>
+        <span class="go">Otevřít →</span>
+      </a>
+      <a class="chcard" href="#jira">
+        <h3>Nález v Jiře</h3>
+        <p>Skutečná chyba v české verzi Jira Cloud: vyšetření přes DevTools a testovací případy.</p>
         <span class="go">Otevřít →</span>
       </a>
     </div>
@@ -744,13 +757,111 @@
     </div>
   </section>
 
-  <footer>Portfolio · Tomáš Halama · tester · 2026 — jeden web, pět kapitol</footer>
+  <!-- ============ JIRA ============ -->
+  <section id="sec-jira" hidden>
+    <p class="eyebrow">Kapitola 05 · Reálný produkt</p>
+    <h1>Nález v Jiře</h1>
+    <p class="lede">Při běžné práci v Jira Cloud nešla smazat pracovní položka. Místo obejití problému jsem ho vyšetřil: zopakoval, vyloučil možné příčiny a rozhodujícím testem ho zúžil na českou lokalizaci.</p>
+
+    <dl class="meta">
+      <div><dt>Produkt</dt><dd>Jira Cloud (Free)</dd></div>
+      <div><dt>Funkce</dt><dd>Smazání pracovní položky</dd></div>
+      <div><dt>Tester</dt><dd>Tomáš Halama</dd></div>
+      <div><dt>Datum</dt><dd>8. 11. 2026</dd></div>
+      <div><dt>Prostředí</dt><dd>Chrome · Windows 11</dd></div>
+      <div><dt>Nástroje</dt><dd>Chrome DevTools (Console)</dd></div>
+    </dl>
+
+    <h2>Nález</h2>
+    <article class="finding">
+      <header>
+        <h3><span class="id">JIRA-01</span> V češtině nejde potvrdit smazání, tlačítko Smazat zůstává neaktivní</h3>
+        <div class="badges"><span class="badge sev-mid">severita: střední</span><span class="badge lens">lokalizace</span></div>
+      </header>
+      <dl>
+        <dt>Kroky</dt><dd>Jazyk Jiry čeština → Backlog → položka → ⋯ → Smazat → do pole napsat text, který dialog požaduje: „odstranit".</dd>
+        <dt>Očekávání</dt><dd class="exp">Tlačítko Smazat se aktivuje a položku jde smazat.</dd>
+        <dt>Realita</dt><dd class="real">Tlačítko zůstává neaktivní. Stejně pro „delete" a i po obnovení stránky.</dd>
+        <dt>Ověření</dt><dd>V angličtině („Type delete to continue") stejný postup funguje.</dd>
+      </dl>
+      <div class="shots">
+        <figure class="shot">
+          <img src="img/jira-cz-smazat.jpg" width="470" height="392" alt="Český dialog Odstranit požadavek SCRUM-3: v poli je napsáno odstranit, tlačítko Smazat je šedé a neaktivní.">
+          <figcaption><b>Čeština:</b> napsáno „odstranit", jak dialog žádá, a tlačítko Smazat zůstává šedé.</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="img/jira-en-delete.jpg" width="470" height="366" alt="Anglický dialog Delete SCRUM-3: v poli je napsáno delete, tlačítko Delete je červené a aktivní.">
+          <figcaption><b>Angličtina:</b> stejný postup, napsáno „delete" a tlačítko Delete je aktivní.</figcaption>
+        </figure>
+      </div>
+      <div class="fix"><span>🔎</span><span><b>Dopad:</b> český uživatel položku nesmaže. Obejít to jde jen přepnutím jazyka, na což běžný uživatel nepřijde.</span></div>
+    </article>
+
+    <h2>Jak jsem zúžil příčinu</h2>
+    <p class="sub">Každý krok vyloučil jednu možnost. Tester nehádá příčinu, ale zužuje ji.</p>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>#</th><th>Hypotéza</th><th>Test</th><th>Výsledek</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">1</td><td>Překlep nebo mezera navíc</td><td>Text smazán a napsán ručně znovu</td><td><span class="pill no">vyloučeno</span></td></tr>
+          <tr><td class="mono">2</td><td>Kontroluje se anglické slovo</td><td>V češtině napsáno „delete"</td><td><span class="pill no">vyloučeno</span></td></tr>
+          <tr><td class="mono">3</td><td>Zaseknutý stav stránky</td><td>Obnovení stránky (F5), opakování</td><td><span class="pill no">vyloučeno</span></td></tr>
+          <tr><td class="mono">4</td><td>Chyba české lokalizace</td><td>Jira přepnuta do angličtiny</td><td><span class="pill ok">potvrzeno</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Testovací případy</h2>
+    <div class="tc">
+      <div class="tc-head"><span class="tc-id">TC-06</span><span class="tc-name">Smazání v angličtině se správným potvrzovacím slovem</span><span class="type pos">Pozitivní</span></div>
+      <div class="rows">
+        <div class="trow"><div class="k">Předpoklad</div><div class="v">Jazyk Jiry English, otevřený dialog Delete u pracovní položky</div></div>
+        <div class="trow"><div class="k">Kroky</div><div class="v"><ol><li>Do pole napíšu požadované slovo</li><li>Sleduji tlačítko Delete</li></ol></div></div>
+        <div class="trow"><div class="k">Testovací data</div><div class="v data">delete</div></div>
+        <div class="trow exp"><div class="k">Očekáváno</div><div class="v">Tlačítko Delete se aktivuje <span class="pill ok">prošlo</span></div></div>
+      </div>
+    </div>
+    <div class="tc">
+      <div class="tc-head"><span class="tc-id">TC-07</span><span class="tc-name">Smazání v češtině se slovem, které dialog požaduje</span><span class="type pos">Pozitivní</span></div>
+      <div class="rows">
+        <div class="trow"><div class="k">Předpoklad</div><div class="v">Jazyk Jiry čeština, otevřený dialog Smazat u pracovní položky</div></div>
+        <div class="trow"><div class="k">Kroky</div><div class="v"><ol><li>Do pole napíšu slovo uvedené v dialogu</li><li>Sleduji tlačítko Smazat</li></ol></div></div>
+        <div class="trow"><div class="k">Testovací data</div><div class="v data">odstranit</div></div>
+        <div class="trow exp"><div class="k">Očekáváno</div><div class="v">Tlačítko Smazat se aktivuje <span class="pill no">selhalo</span>: zůstává neaktivní</div></div>
+      </div>
+    </div>
+    <div class="tc">
+      <div class="tc-head"><span class="tc-id">TC-08</span><span class="tc-name">Smazání v češtině s jiným než požadovaným slovem</span><span class="type neg">Negativní</span></div>
+      <div class="rows">
+        <div class="trow"><div class="k">Předpoklad</div><div class="v">Jazyk Jiry čeština, otevřený dialog Smazat</div></div>
+        <div class="trow"><div class="k">Kroky</div><div class="v"><ol><li>Do pole napíšu jiné slovo, než dialog požaduje</li><li>Sleduji tlačítko Smazat</li></ol></div></div>
+        <div class="trow"><div class="k">Testovací data</div><div class="v data">delete</div></div>
+        <div class="trow exp"><div class="k">Očekáváno</div><div class="v">Tlačítko zůstává neaktivní <span class="pill ok">prošlo</span></div></div>
+      </div>
+    </div>
+
+    <h2>Co jsem si z toho odnesl</h2>
+    <figure class="shot wide">
+      <img src="img/jira-konzole-404.jpg" width="645" height="178" alt="Konzole Chrome DevTools po vyčištění: tři požadavky GET na přílohy smazané položky SCRUM-5 končí chybou 404 Not Found.">
+      <figcaption><b>Konzole po vyčištění:</b> aplikace dál žádá o přílohy smazané položky SCRUM-5 a server vrací 404.</figcaption>
+    </figure>
+    <div class="insight">
+      <h3>Vyčistit konzoli a zopakovat</h3>
+      <p>Jira má v konzoli DevTools stovky hlášek už po načtení stránky. Teprve po vyčištění a zopakování akce bylo vidět, co vyvolala. Navíc se ukázalo, že aplikace po smazání jiné položky dál opakovaně žádá o její přílohy a server odpovídá <code>404</code>. Je to <b>stopa, ne důkaz</b> příčiny, a tak jsem ji v reportu uvedl jen jako vedlejší pozorování.</p>
+    </div>
+    <div class="insight">
+      <h3>Negativní případ ukazuje, kde chyba není</h3>
+      <p>„delete" v češtině tlačítko neodemkne, a to je správně (TC-08). Chyba není v tom, že kontrola existuje, ale v tom, že <b>nesedí s textem, který uživatel na obrazovce vidí</b>. Proto je nález zařazený jako lokalizační.</p>
+    </div>
+  </section>
+
+  <footer>Portfolio · Tomáš Halama · tester · 2026 — jeden web, šest kapitol</footer>
 
 </div>
 
 <script>
   (function () {
-    var sections = ["uvod", "rucni", "api", "sql", "pripady"];
+    var sections = ["uvod", "rucni", "api", "sql", "pripady", "jira"];
     var navLinks = Array.prototype.slice.call(document.querySelectorAll(".nav a"));
 
     function show(id) {
