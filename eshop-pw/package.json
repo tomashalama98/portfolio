@@ -1,0 +1,16 @@
+{
+  "name": "eshop-pw",
+  "version": "1.0.0",
+  "description": "E2E testy cvičného e-shopu automationexercise.com (Playwright, Page Object Model)",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:regression": "playwright test --grep @regression",
+    "report": "playwright show-report"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "1.49.1"
+  }
+}

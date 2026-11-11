@@ -5,3 +5,9 @@ stranky/
 jerab-udrzba/
 jerab-udrzba-web.html
 sql/vysledek.txt
+
+# eshop-pw
+eshop-pw/node_modules
+eshop-pw/playwright-report
+eshop-pw/test-results
+eshop-pw/results.json
