@@ -333,6 +333,7 @@
       <a href="#sql" data-sec="sql">SQL</a>
       <a href="#pripady" data-sec="pripady">Testovací případy</a>
       <a href="#jira" data-sec="jira">Jira</a>
+      <a href="#eshop" data-sec="eshop">E-shop</a>
     </nav>
   </div>
 </header>
@@ -355,7 +356,7 @@
     </div>
 
     <h2>Co je uvnitř</h2>
-    <p class="sub">Pět ukázek odvedené práce. Klikni na kapitolu nebo použij menu nahoře.</p>
+    <p class="sub">Šest ukázek odvedené práce. Klikni na kapitolu nebo použij menu nahoře.</p>
     <div class="chapters">
       <a class="chcard" href="#rucni">
         <h3>Ruční testování</h3>
@@ -380,6 +381,11 @@
       <a class="chcard" href="#jira">
         <h3>Nález v Jiře</h3>
         <p>Skutečná chyba v české verzi Jira Cloud: vyšetření přes DevTools a testovací případy.</p>
+        <span class="go">Otevřít →</span>
+      </a>
+      <a class="chcard" href="#eshop">
+        <h3>Automatizace e-shopu</h3>
+        <p>15 testů v Playwrightu s Page Object Modelem, CI a jeden nalezený bug webu.</p>
         <span class="go">Otevřít →</span>
       </a>
     </div>
@@ -871,13 +877,133 @@
     </div>
   </section>
 
+  <!-- ============ E-SHOP ============ -->
+  <section id="sec-eshop" hidden>
+    <p class="eyebrow">Kapitola 06 · Automatizace</p>
+    <h1>Automatizace e-shopu</h1>
+    <p class="lede">Sada end-to-end testů veřejného cvičného e-shopu v Playwrightu s Page Object Modelem a spouštěním v GitHub Actions. Ukazuje, jak se z ručních scénářů stává opakovatelná kontrola, a co všechno se při tom musí vyřešit, aby testy nebyly náhodné.</p>
+
+    <dl class="meta">
+      <div><dt>Aplikace</dt><dd>automationexercise.com</dd></div>
+      <div><dt>Nástroj</dt><dd>Playwright 1.49 · Page Object Model</dd></div>
+      <div><dt>Testů</dt><dd>15 (6 @smoke, 9 @regression) ve 4 skupinách</dd></div>
+      <div><dt>CI</dt><dd>GitHub Actions</dd></div>
+      <div><dt>Stabilita</dt><dd>8 běhů bez neúspěchu</dd></div>
+      <div><dt>Nálezy</dt><dd>1 chyba webu</dd></div>
+    </dl>
+
+    <h2>Co se testuje</h2>
+    <p class="sub">Čtyři skupiny: registrace a přihlášení, produkty, košík a objednávka. Každý test má ID a tag <span class="inline-code">@smoke</span> nebo <span class="inline-code">@regression</span>.</p>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>ID</th><th>Skupina</th><th>Tag</th><th>Co ověřuje</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">TC-E01</td><td>Přihlášení</td><td class="mono">@smoke</td><td>Registrace nového uživatele přes formulář, přihlášení po registraci a smazání účtu.</td></tr>
+          <tr><td class="mono">TC-E02</td><td>Přihlášení</td><td class="mono">@smoke</td><td>Přihlášení existujícího uživatele, zobrazení jména a odhlášení.</td></tr>
+          <tr><td class="mono">TC-E03</td><td>Přihlášení</td><td class="mono">@regression</td><td>Přihlášení se špatným heslem zobrazí chybu a nepřihlásí.</td></tr>
+          <tr><td class="mono">TC-E04</td><td>Přihlášení</td><td class="mono">@regression</td><td>Registrace s už existujícím e-mailem je odmítnuta.</td></tr>
+          <tr><td class="mono">TC-E05</td><td>Produkty</td><td class="mono">@smoke</td><td>Vyhledávání „dress“ vrátí známé produkty (hledá se i podle kategorie).</td></tr>
+          <tr><td class="mono">TC-E06</td><td>Produkty</td><td class="mono">@regression</td><td>Vyhledání neexistujícího produktu nevrátí žádnou položku.</td></tr>
+          <tr><td class="mono">TC-E07</td><td>Produkty</td><td class="mono">@regression</td><td>Filtr kategorie Women &gt; Dress zobrazí jen produkty té kategorie.</td></tr>
+          <tr><td class="mono">TC-E08</td><td>Produkty</td><td class="mono">@smoke</td><td>Detail produktu zobrazí název, kategorii, cenu, dostupnost, stav a značku.</td></tr>
+          <tr><td class="mono">TC-E09</td><td>Košík</td><td class="mono">@smoke</td><td>Přidání produktu z výpisu do košíku (cena, množství 1, celkem).</td></tr>
+          <tr><td class="mono">TC-E10</td><td>Košík</td><td class="mono">@regression</td><td>Množství zadané na detailu produktu se přenese do košíku (4 × 500 = 2000).</td></tr>
+          <tr><td class="mono">TC-E11</td><td>Košík</td><td class="mono">@regression</td><td>Odebrání produktu z košíku vyprázdní košík.</td></tr>
+          <tr><td class="mono">TC-E12</td><td>Košík</td><td class="mono">@regression</td><td>U dvou produktů platí celkem = cena × množství.</td></tr>
+          <tr><td class="mono">TC-E13</td><td>Košík</td><td class="mono">@regression</td><td>Nepřihlášený uživatel je u pokladny vyzván k registraci nebo přihlášení.</td></tr>
+          <tr><td class="mono">TC-E14</td><td>Objednávka</td><td class="mono">@smoke</td><td>End-to-end objednávka přihlášeného uživatele, platba testovací kartou, hláška o úspěchu, smazání účtu.</td></tr>
+          <tr><td class="mono">TC-E15</td><td>Košík</td><td class="mono">@regression</td><td>Záporné množství nesmí skončit v košíku (očekávané selhání kvůli N-01).</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Architektura</h2>
+    <p class="sub">Testy nevolají <span class="inline-code">page.locator</span> přímo, používají jen metody page objectů.</p>
+    <div class="insight">
+      <h3>Page objecty: jedna třída na stránku</h3>
+      <p>Locatory a akce jedné stránky jsou na jednom místě: <code>BasePage</code> (hlavička, odhlášení, smazání účtu), <code>LoginPage</code>, <code>SignupPage</code>, <code>ProductsPage</code>, <code>ProductDetailPage</code>, <code>CartPage</code> a <code>CheckoutPage</code>. Když web změní jedno tlačítko, opravuje se jedno místo, ne každý test zvlášť. Locatory jsou přes role, label nebo text a jinak přes stabilní <code>data-qa</code> atributy nebo ID.</p>
+    </div>
+    <div class="insight">
+      <h3>Fixtury: nezávislé testy a úklid</h3>
+      <p><b>Unikátní uživatel:</b> každý test dostane vlastního uživatele s unikátním e-mailem (časové razítko, PID a čítač), takže se testy nepletou ani při paralelním běhu. <b>Účet přes API:</b> test, který účet jen potřebuje, ho vytvoří přes API webu, což je rychlejší a stabilnější než formulář, a po testu ho smaže přes <code>DELETE /api/deleteAccount</code>, i když test selže uprostřed. <b>Blokace reklam:</b> fixtura kontextu zruší požadavky na reklamní domény, které překrývají stránku a blokují kliknutí.</p>
+    </div>
+    <p class="sub">Úryvek ze skutečné třídy <span class="inline-code">CartPage</span>:</p>
+    <div class="sql"><button class="copy" type="button">Kopírovat</button><pre>/** Klik na "Proceed To Checkout" se opakuje, dokud se neobjeví modal nebo se nezmění URL. */
+async proceedToCheckout({ loggedIn = false } = {}) {
+  await expect(async () =&gt; {
+    await this.checkoutButton.click({ timeout: 2_000 });
+    if (loggedIn) {
+      await expect(this.page).toHaveURL(/\/checkout/, { timeout: 3_000 });
+    } else {
+      await expect(this.checkoutModal).toBeVisible({ timeout: 3_000 });
+    }
+  }).toPass({ timeout: 20_000 });
+}</pre></div>
+
+    <h2>Co jsem řešil: nestabilita</h2>
+    <p class="sub">Testy, které jednou projdou a podruhé ne, jsou horší než žádné. Proto jsem je nenechal tak.</p>
+    <div class="insight">
+      <h3>Příznak</h3>
+      <p>Při vývoji TC-E11 a TC-E13 občas selhaly v paralelním běhu, <b>ve 3 ze 6 běhů</b>. Neprovedl se první klik na „Proceed To Checkout“ a na odebrání položky z košíku.</p>
+    </div>
+    <div class="insight">
+      <h3>Příčina</h3>
+      <p>Zjistil jsem, že web váže klikací handlery až po načtení skriptů. Pokud test klikne dřív, klik se na stránce neprojeví a test pak čeká na něco, co nikdy nenastane. Druhým rušivým prvkem byl souhlasový dialog Google Funding Choices, který překrýval stránku.</p>
+    </div>
+    <div class="insight">
+      <h3>Oprava</h3>
+      <p>Klik se v page objectech opakuje přes <code>expect().toPass()</code>, dokud se neprojeví očekávaný výsledek. Pevná čekání (<code>waitForTimeout</code>) nepoužívám. Souhlasový dialog je zablokovaný spolu s reklamními doménami. Po úpravách proběhlo <b>8 po sobě jdoucích běhů bez neúspěchu</b>, test jsem nesmazal ani nepřeskočil.</p>
+    </div>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>Režim</th><th>Běhů</th><th>Neúspěšných</th><th>Čas jednoho běhu</th></tr></thead>
+        <tbody>
+          <tr><td>Lokálně (3 workery, bez opakování)</td><td class="mono">5</td><td class="mono">0</td><td class="mono">19,7–23,7 s</td></tr>
+          <tr><td>CI režim (2 workery, 1 opakování)</td><td class="mono">3</td><td class="mono">0</td><td class="mono">29,7–32,6 s</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Nález</h2>
+    <article class="finding">
+      <header>
+        <h3><span class="id">N-01</span> Web přijme nulové a záporné množství produktu v košíku</h3>
+        <div class="badges"><span class="badge sev-mid">severita: střední</span><span class="badge lens">validace vstupu</span></div>
+      </header>
+      <dl>
+        <dt>Kroky</dt><dd>Detail produktu <span class="inline-code">/product_details/1</span> (Blue Top, Rs. 500) → do pole Quantity zadat <span class="inline-code">-2</span> (u <span class="inline-code">0</span> je chování stejné) → Add to cart → otevřít <span class="inline-code">/view_cart</span>.</dd>
+        <dt>Očekávání</dt><dd class="exp">Množství menší než 1 se odmítne (nebo opraví na 1) a v košíku není položka se zápornou cenou.</dd>
+        <dt>Realita</dt><dd class="real">Web zobrazí potvrzení „Added!“ a v košíku je Blue Top s množstvím <span class="inline-code">-2</span> a celkem <span class="inline-code">Rs. -1000</span>. U množství 0 je v košíku řádek s množstvím 0 a cenou Rs. 0.</dd>
+        <dt>Příčina</dt><dd>Atribut <span class="inline-code">min="1"</span> na poli se uplatní jen v prohlížeči a tlačítko Add to cart formulář neodesílá. Validace tedy zřejmě chybí i na straně serveru.</dd>
+        <dt>Test</dt><dd><span class="inline-code">TC-E15</span> (<span class="inline-code">tests/cart.spec.js</span>) je označený <span class="inline-code">test.fail()</span> s anotací <span class="inline-code">bug: N-01</span>. Výsledek „15 passed“ tedy znamená 14 zelených testů a 1 očekávané selhání. Až web chybu opraví, test začne „neočekávaně procházet“ a upozorní na to.</dd>
+      </dl>
+      <div class="fix"><span>🔎</span><span><b>Dopad:</b> v košíku může vzniknout položka se zápornou cenou, tedy nesmyslný součet objednávky.</span></div>
+    </article>
+
+    <h2>CI v GitHub Actions</h2>
+    <div class="insight">
+      <h3>Kdy workflow běží</h3>
+      <p>Spouští se při push se změnou v <code>eshop-pw/**</code>, ručně a každé pondělí v 05:17 UTC. Nainstaluje závislosti a Chromium, spustí celou sadu s <code>CI=true</code> (2 workery, 1 opakování) a nahraje HTML report a trace se screenshoty jako artefakty s uložením na 14 dní. GitHub Actions workflow jsem zatím nespouštěl, lokálně jsem ověřil stejnou konfiguraci s <code>CI=true</code>.</p>
+    </div>
+    <div class="btnrow">
+      <a class="btn" href="https://github.com/tomashalama98/portfolio/tree/main/eshop-pw" target="_blank" rel="noopener">Zdrojový kód testů <span class="ar">→</span></a>
+      <a class="btn" href="https://github.com/tomashalama98/portfolio/actions/workflows/eshop-tests.yml" target="_blank" rel="noopener">Workflow v GitHub Actions <span class="ar">→</span></a>
+    </div>
+
+    <h2>Omezení</h2>
+    <div class="insight">
+      <h3>Co tahle sada nedokládá</h3>
+      <p>Testuje se jen Chromium, a to proti veřejnému cvičnému webu, jehož dostupnost ani chování nemám pod kontrolou. Když web spadne nebo se změní, testy mohou selhat, aniž by byla chyba v nich. Jiné prohlížeče, výkon ani přístupnost tahle sada neověřuje.</p>
+    </div>
+  </section>
+
   <footer>Portfolio · Tomáš Halama · tester · 2026 — jeden web, šest kapitol</footer>
 
 </div>
 
 <script>
   (function () {
-    var sections = ["uvod", "rucni", "api", "sql", "pripady", "jira"];
+    var sections = ["uvod", "rucni", "api", "sql", "pripady", "jira", "eshop"];
     var navLinks = Array.prototype.slice.call(document.querySelectorAll(".nav a"));
 
     function show(id) {
