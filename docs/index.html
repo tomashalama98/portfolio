@@ -983,7 +983,7 @@ async proceedToCheckout({ loggedIn = false } = {}) {
     <h2>CI v GitHub Actions</h2>
     <div class="insight">
       <h3>Kdy workflow běží</h3>
-      <p>Spouští se při push se změnou v <code>eshop-pw/**</code>, ručně a každé pondělí v 05:17 UTC. Nainstaluje závislosti a Chromium, spustí celou sadu s <code>CI=true</code> (2 workery, 1 opakování) a nahraje HTML report a trace se screenshoty jako artefakty s uložením na 14 dní. GitHub Actions workflow jsem zatím nespouštěl, lokálně jsem ověřil stejnou konfiguraci s <code>CI=true</code>.</p>
+      <p>Spouští se při push se změnou v <code>eshop-pw/**</code>, ručně a každé pondělí v 05:17 UTC. Nainstaluje závislosti a Chromium, spustí celou sadu s <code>CI=true</code> (2 workery, 1 opakování) a nahraje HTML report a trace se screenshoty jako artefakty s uložením na 14 dní. Poslední ověřený běh v GitHub Actions (11. 11. 2026): <strong>15 passed za 17,1 s</strong>, tedy 14 zelených testů a 1 očekávané selhání kvůli N-01. Dva předchozí běhy spadly ještě před spuštěním testů, protože se na runneru nepodařilo přeložit adresu zrcadel pro <code>apt</code> (<code>--with-deps</code>). Prohlížeč teď instaluji bez <code>apt</code>, runner potřebné knihovny už má.</p>
     </div>
     <div class="btnrow">
       <a class="btn" href="https://github.com/tomashalama98/portfolio/tree/main/eshop-pw" target="_blank" rel="noopener">Zdrojový kód testů <span class="ar">→</span></a>
